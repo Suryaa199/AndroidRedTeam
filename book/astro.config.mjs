@@ -9,6 +9,21 @@ export default defineConfig({
 		starlight({
 			title: 'Android Red Team',
 			description: 'Bytecode-level biometric bypass for Android KYC and liveness verification',
+			favicon: '/favicon.svg',
+			customCss: ['./src/styles/custom.css'],
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/iamjosephmj/AndroidRedTeam' },
+			],
+			head: [
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: 'https://iamjosephmj.github.io/AndroidRedTeam/og-image.png' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'theme-color', content: '#dc2626' },
+				},
+			],
 			sidebar: [
 				{
 					label: 'Book',
