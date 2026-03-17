@@ -142,8 +142,8 @@ engagement:
     - "mock location: patched isMock() to return false"
   payloads:
     camera_frames: "male_caucasian_30s/neutral + tilt_left + tilt_right + nod"
-    location_config: "nyc_midtown.json"
-    sensor_config: "holding.json + tilt_left.json + tilt_right.json + nod.json"
+    location_config: "times-square.json"
+    sensor_config: "holding.json + tilt-left.json + tilt-right.json + nod.json"
   geofence_coordinates:
     latitude: 40.7580
     longitude: -73.9855

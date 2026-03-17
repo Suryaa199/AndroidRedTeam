@@ -63,7 +63,7 @@ apktool d target.apk -o decoded/
 For the practice target:
 
 ```bash
-apktool d course-1/targets/target-kyc-basic.apk -o decoded/
+apktool d materials/targets/target-kyc-basic.apk -o decoded/
 ```
 
 The decoded directory is your intelligence source for the rest of the engagement. Keep it around -- you will come back to it when things go wrong during execution.
@@ -175,7 +175,7 @@ The `tee` command writes to both the screen and a file simultaneously. You watch
 For the practice target:
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk --work-dir ./work 2>&1 | tee patch_output.txt
 ```
 
@@ -866,7 +866,7 @@ Sensor hooks will be skipped by the patch-tool since there is no `onSensorChange
 **Preparation:**
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk --work-dir ./work 2>&1 | tee patch_output.txt
 
 adb install -r patched.apk

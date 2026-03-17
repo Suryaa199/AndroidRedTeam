@@ -18,7 +18,7 @@ All commands assume you are working from the project root (where `patch-tool.jar
 Run the patch-tool against the course target:
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk \
   --work-dir ./work
 ```
@@ -28,7 +28,7 @@ This takes 30-60 seconds. The tool decodes the APK, injects 1,134 runtime classe
 Save the full output for your records:
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk \
   --work-dir ./work 2>&1 | tee patch_output.txt
 ```
@@ -148,7 +148,13 @@ The overlay (lightning bolt button) only appears when payload directories contai
 
 Frame payloads are not distributed with the course materials (privacy constraints on face images). Generate simple test frames to verify the injection pipeline. These gray rectangles will not pass face detection, but they prove the injection is operational.
 
-You need `ffmpeg` installed (`brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Linux).
+Use the provided script at `materials/payloads/frames/generate-test-frames.sh`:
+
+```bash
+./materials/payloads/frames/generate-test-frames.sh /tmp/test_frames 30
+```
+
+Or generate them manually with `ffmpeg` (`brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Linux):
 
 ```bash
 mkdir -p /tmp/test_frames

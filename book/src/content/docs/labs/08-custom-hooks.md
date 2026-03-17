@@ -25,13 +25,13 @@ Decode and count all `loadUrl()` call-sites:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-apktool d course-1/targets/target-webview-app.apk -o decoded-webview/
+apktool d materials/targets/target-webview-app.apk -o decoded-webview/
 ```
 
 If the target APK is not available, decode `target-kyc-basic.apk`:
 
 ```bash
-apktool d course-1/targets/target-kyc-basic.apk -o decoded-webview/
+apktool d materials/targets/target-kyc-basic.apk -o decoded-webview/
 ```
 
 Find every `loadUrl()` call:
@@ -169,7 +169,7 @@ Run it against the target:
 
 ```bash
 java -jar patch-tool/build/libs/patch-tool.jar \
-  course-1/targets/target-webview-app.apk \
+  materials/targets/target-webview-app.apk \
   --out webview-patched.apk --work-dir ./work-webview
 ```
 

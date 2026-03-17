@@ -155,7 +155,7 @@ echo "=== DONE ==="
 
 ```bash
 chmod +x full_engagement.sh
-./full_engagement.sh course-1/targets/target-kyc-basic.apk
+./full_engagement.sh materials/targets/target-kyc-basic.apk
 ```
 
 The entire pipeline runs in a single invocation. Review the output -- every phase should complete without errors.

@@ -135,7 +135,7 @@ java -jar patch-tool.jar --help
 The first line should show the tool name and version, followed by usage information listing all available options (`--out`, `--work-dir`, `--app-class`, etc.).
 
 **If it fails:**
-- `Unable to access jarfile` -- You are not in the project root, or `patch-tool.jar` was not built. The JAR lives at the project root, not inside `course-1/tools/`.
+- `Unable to access jarfile` -- You are not in the project root, or `patch-tool.jar` was not built. The JAR lives at the project root, not inside `materials/`.
 - `UnsupportedClassVersionError` -- Your Java is too old. Go back to Step 1.
 
 ---
@@ -183,7 +183,7 @@ rm /tmp/lab0-test.txt
 ## Step 7: Verify the Target APK Exists
 
 ```bash
-ls -lh course-1/targets/target-kyc-basic.apk
+ls -lh materials/targets/target-kyc-basic.apk
 ```
 
 **Expected output:**
@@ -267,8 +267,8 @@ rm -f /tmp/lab0-verify.txt
 
 echo ""
 echo "--- Target APK ---"
-if [ -f "course-1/targets/target-kyc-basic.apk" ]; then
-    SIZE=$(ls -lh course-1/targets/target-kyc-basic.apk | awk '{print $5}')
+if [ -f "materials/targets/target-kyc-basic.apk" ]; then
+    SIZE=$(ls -lh materials/targets/target-kyc-basic.apk | awk '{print $5}')
     echo "  [PASS] target-kyc-basic.apk present ($SIZE)"
     ((PASS++))
 else
@@ -357,7 +357,7 @@ Take a screenshot of the health check output showing all checks passed. This scr
 - [ ] `apktool --version` returns 2.9.0 or higher
 - [ ] `java -jar patch-tool.jar --help` prints usage information
 - [ ] `adb push` and `adb shell cat` round-trip a test file successfully
-- [ ] `target-kyc-basic.apk` exists in `course-1/targets/`
+- [ ] `target-kyc-basic.apk` exists in `materials/targets/`
 - [ ] Health check script reports 0 failures
 
 ---

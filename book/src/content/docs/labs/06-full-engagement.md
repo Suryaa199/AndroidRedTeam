@@ -33,7 +33,7 @@ If you do not already have a decoded copy from previous labs, decode it now:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-apktool d course-1/targets/target-kyc-basic.apk -o decoded-engagement/
+apktool d materials/targets/target-kyc-basic.apk -o decoded-engagement/
 ```
 
 ### Run the Full Surface Scan
@@ -140,7 +140,7 @@ Patch the APK and save the output for your engagement report:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched-engagement.apk \
   --work-dir ./work-engagement 2>&1 | tee patch_output.txt
 ```

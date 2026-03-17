@@ -566,7 +566,7 @@ echo ""
 echo "=========================================="
 ```
 
-Save this as `recon.sh` in your project root and make it executable (`chmod +x recon.sh`). Run it against any decoded APK directory:
+A ready-to-use version of this script is included in the materials kit at `materials/scripts/recon.sh`. You can also save the above as `recon.sh` in your project root and make it executable (`chmod +x recon.sh`). Run it against any decoded APK directory:
 
 ```bash
 apktool d target.apk -o decoded/

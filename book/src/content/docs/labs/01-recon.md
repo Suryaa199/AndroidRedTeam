@@ -18,7 +18,7 @@ The target is `target-kyc-basic.apk` (package: `com.poc.biometric`). All command
 Use `apktool` to decode the target into human-readable smali and XML:
 
 ```bash
-apktool d course-1/targets/target-kyc-basic.apk -o recon-decoded/
+apktool d materials/targets/target-kyc-basic.apk -o recon-decoded/
 ```
 
 This takes a few seconds. When it finishes, you have a directory tree containing the decoded manifest, smali bytecode, resources, and assets.

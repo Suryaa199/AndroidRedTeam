@@ -222,7 +222,7 @@ The practice target APK must also be built:
 
 ```bash
 ./gradlew :app:assembleDebug
-cp app/build/outputs/apk/debug/app-debug.apk course-1/targets/target-kyc-basic.apk
+cp app/build/outputs/apk/debug/app-debug.apk materials/targets/target-kyc-basic.apk
 ```
 
 ### Verification
@@ -245,7 +245,7 @@ You should see the full usage information with all options. Common errors:
 ```text
 project-root/
   patch-tool.jar               <- the CLI that patches APKs
-  course-1/
+  materials/
     targets/
       target-kyc-basic.apk     <- the demo target (package: com.poc.biometric)
     payloads/
@@ -254,7 +254,7 @@ project-root/
       sensor/                   <- sensor config files (ready to use)
     guides/                     <- reference guides (the original course material)
     exercises/                  <- hands-on exercises per module
-  materials/                    <- the materials kit (payload configs, scripts, templates)
+    scripts/                    <- payload configs, scripts, templates
   book/                         <- this book (Astro Starlight site)
 ```
 
@@ -268,7 +268,13 @@ Camera frame payloads require you to generate your own images. Privacy constrain
 
 ### Quick Test Frames
 
-For pipeline verification (won't pass face detection, but confirms injection is working):
+For pipeline verification (won't pass face detection, but confirms injection is working), use the provided script at `materials/payloads/frames/generate-test-frames.sh`:
+
+```bash
+./materials/payloads/frames/generate-test-frames.sh test_frames 30
+```
+
+Or manually with `ffmpeg` (`brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Linux):
 
 ```bash
 mkdir -p test_frames
@@ -277,8 +283,6 @@ for i in $(seq -w 1 30); do
     -frames:v 1 "test_frames/${i}.png" 2>/dev/null
 done
 ```
-
-Requires `ffmpeg` (`brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Linux).
 
 ### Real Face Frames
 

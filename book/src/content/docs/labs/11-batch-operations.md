@@ -34,7 +34,7 @@ Before scripting, do a quick recon on each target so you know what to expect:
 ```bash
 cd /Users/josejames/Documents/android-red-team
 
-for apk in course-1/targets/target-batch-*.apk; do
+for apk in materials/targets/target-batch-*.apk; do
     name=$(basename "$apk" .apk)
     echo "=== $name ==="
     apktool d "$apk" -o "decoded-$name/" -f
@@ -64,7 +64,7 @@ Create the batch patching script:
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGETS_DIR="course-1/targets"
+TARGETS_DIR="materials/targets"
 PATCH_TOOL="patch-tool.jar"
 
 mkdir -p patched reports work
@@ -112,8 +112,8 @@ Payload mapping:
 | Target | Frames | Location | Sensor |
 |--------|--------|----------|--------|
 | batch-1 | face frames | -- | -- |
-| batch-2 | -- | `default_location.json` | -- |
-| batch-3 | face frames | `default_location.json` | `holding.json` |
+| batch-2 | -- | `times-square.json` | -- |
+| batch-3 | face frames | `times-square.json` | `holding.json` |
 
 ```bash
 #!/usr/bin/env bash

@@ -38,7 +38,7 @@ Your patched APK triggers all four: it has a different signature (you re-signed 
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-apktool d course-1/targets/target-hardened-kyc.apk -o decoded-hardened/
+apktool d materials/targets/target-hardened-kyc.apk -o decoded-hardened/
 ```
 
 ### Systematic Defense Scan

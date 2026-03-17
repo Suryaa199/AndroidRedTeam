@@ -21,7 +21,7 @@ If you completed Lab 1, you already have the decoded APK. If not, decode it now:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-apktool d course-1/targets/target-kyc-basic.apk -o decoded-kyc/
+apktool d materials/targets/target-kyc-basic.apk -o decoded-kyc/
 ```
 
 Search the decoded smali for geofence coordinates. The app will have hardcoded latitude and longitude values somewhere in its location verification logic:
@@ -90,7 +90,7 @@ Patch the target APK. Watch the output for location-related hook confirmations:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched-location.apk \
   --work-dir ./work-location 2>&1 | tee patch_location_output.txt
 ```

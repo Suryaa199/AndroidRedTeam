@@ -392,7 +392,7 @@ Each frame should show a face centered in the image, filling roughly a third of 
 
 ```bash
 # Patch (from project root)
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk --work-dir ./work
 
 # Install

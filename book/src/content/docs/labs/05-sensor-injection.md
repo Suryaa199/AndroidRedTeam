@@ -168,7 +168,7 @@ Patch the APK. You need both camera and sensor hooks to be active:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched-sensor.apk \
   --work-dir ./work-sensor 2>&1 | tee patch_sensor_output.txt
 ```

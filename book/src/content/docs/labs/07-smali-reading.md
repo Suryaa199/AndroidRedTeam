@@ -43,13 +43,13 @@ Decode the APK:
 
 ```bash
 cd /Users/josejames/Documents/android-red-team
-apktool d course-1/targets/target-sharedprefs.apk -o decoded-prefs/
+apktool d materials/targets/target-sharedprefs.apk -o decoded-prefs/
 ```
 
 If the target APK is not available, decode `target-kyc-basic.apk` instead:
 
 ```bash
-apktool d course-1/targets/target-kyc-basic.apk -o decoded-prefs/
+apktool d materials/targets/target-kyc-basic.apk -o decoded-prefs/
 ```
 
 Now find every class that calls `SharedPreferences.getString()`:

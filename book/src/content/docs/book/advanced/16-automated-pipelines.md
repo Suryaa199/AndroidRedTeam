@@ -346,7 +346,7 @@ jobs:
       - name: Decode and recon
         run: |
           java -jar /usr/local/bin/apktool.jar d "${{ inputs.target_apk }}" -o decoded
-          ./scripts/recon.sh decoded > recon-report.json
+          ./materials/scripts/recon.sh decoded > recon-report.json
       - name: Upload recon report
         uses: actions/upload-artifact@v4
         with:
@@ -539,7 +539,7 @@ pipeline:
     logcat_timeout: 15
     collect_evidence: true
   - phase: report
-    template: templates/engagement-report.md
+    template: materials/templates/engagement-report-template.md
 ```
 
 A runner script reads this YAML, executes each phase for each target, and produces the report. The engagement configuration is version-controlled. You can diff it between quarters to see what changed. You can hand it to another operator and they reproduce your results exactly. You can run it in CI on a schedule.

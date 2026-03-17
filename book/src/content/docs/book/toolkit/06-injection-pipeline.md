@@ -132,7 +132,7 @@ The output is a fully installable APK with a different signature than the origin
 From the project root (where `patch-tool.jar` lives):
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk
 ```
 
 Output lands in the same directory as the input, named `target-kyc-basic-patched.apk`.
@@ -140,7 +140,7 @@ Output lands in the same directory as the input, named `target-kyc-basic-patched
 ### With options
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk \
   --work-dir ./work
 ```
@@ -258,7 +258,7 @@ If something does not match, stop. Investigate before deploying. Common causes:
 Save the full console output as part of your engagement evidence:
 
 ```bash
-java -jar patch-tool.jar course-1/targets/target-kyc-basic.apk \
+java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
   --out patched.apk \
   --work-dir ./work 2>&1 | tee patch_output.txt
 ```
@@ -571,7 +571,7 @@ To trigger the overlay for verification, create a payload directory and push at 
 ```bash
 adb shell mkdir -p /sdcard/poc_frames/face_neutral/
 # Push test frames (or real frames if you have them)
-adb push course-1/payloads/frames/face_neutral/ /sdcard/poc_frames/face_neutral/
+adb push materials/payloads/frames/face_neutral/ /sdcard/poc_frames/face_neutral/
 ```
 
 If you do not have face frames yet, generate simple test frames to confirm the pipeline works:

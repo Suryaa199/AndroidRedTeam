@@ -223,7 +223,7 @@ echo "Sensor listeners:   $(grep -c 'SENSOR_LISTENER_HIT' delivery_log.txt)"
 The materials include a `delivery-stats.sh` script that automates logcat parsing and calculates accept rates:
 
 ```bash
-./delivery-stats.sh delivery_log.txt
+materials/scripts/delivery-stats.sh delivery_log.txt
 ```
 
 It produces output like:
@@ -276,6 +276,8 @@ The engagement report is a structured document that answers three questions: Wha
 Every section serves one of these questions. There is no filler. If a section does not contribute to one of the three answers, it does not belong in the report.
 
 ### Report Template
+
+The materials kit includes ready-to-use templates at `materials/templates/engagement-report-template.md` and `materials/templates/recon-report-template.md`. Use them as starting points for your engagements.
 
 ```markdown
 # Engagement Report: Biometric Verification Bypass Assessment
