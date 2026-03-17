@@ -1,6 +1,6 @@
-# Injecting Android
+# Android Biometric Bypass
 
-Camera injection, GPS spoofing, and sensor manipulation against Android identity verification.
+Injecting cameras, sensors & location to defeat Android identity verification.
 
 **[Read the book →](https://iamjosephmj.github.io/AndroidRedTeam/)**
 

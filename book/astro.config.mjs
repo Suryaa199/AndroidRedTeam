@@ -7,11 +7,11 @@ export default defineConfig({
 	base: '/AndroidRedTeam',
 	integrations: [
 		starlight({
-			title: 'Injecting Android',
-			description: 'Camera injection, GPS spoofing, and sensor manipulation against Android identity verification',
+			title: 'Android Biometric Bypass',
+			description: 'Injecting cameras, sensors & location to defeat Android identity verification',
 			logo: {
 				src: './src/assets/logo.svg',
-				alt: 'Injecting Android',
+				alt: 'Android Biometric Bypass',
 			},
 			favicon: '/favicon.svg',
 			customCss: ['./src/styles/custom.css'],
