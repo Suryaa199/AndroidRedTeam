@@ -273,3 +273,38 @@ Consider them part of the methodology. A professional operator thinks about auth
 ## What Comes Next
 
 With the rules established, Chapter 3 dives into the technology that makes all of this possible. You'll learn how Android delivers camera frames, GPS fixes, and sensor readings to applications — the architecture that creates the surfaces you'll spend the rest of this book assessing under authorization. Understanding *why* the hooks work at an architectural level is what separates an operator who can run the tools from one who can adapt when things don't go as expected.
+
+---
+
+### References: Legal Texts and Primary Sources
+
+**United States**
+- [18 U.S.C. § 1030 — Computer Fraud and Abuse Act (CFAA)](https://www.law.cornell.edu/uscode/text/18/1030)
+- [17 U.S.C. § 1201 — DMCA Anti-Circumvention](https://www.law.cornell.edu/uscode/text/17/1201)
+- [17 U.S.C. § 1201(j) — Security Testing Exemption](https://www.law.cornell.edu/uscode/text/17/1201)
+- [Van Buren v. United States, 593 U.S. 374 (2021)](https://supreme.justia.com/cases/federal/us/593/374/)
+- [U.S. Copyright Office — Section 1201 Rulemaking](https://www.copyright.gov/1201/)
+- [740 ILCS 14 — Illinois Biometric Information Privacy Act (BIPA)](https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=3004)
+
+**United Kingdom**
+- [Computer Misuse Act 1990](https://www.legislation.gov.uk/ukpga/1990/18/contents)
+
+**European Union**
+- [Regulation (EU) 2024/2847 — Cyber Resilience Act (CRA)](https://eur-lex.europa.eu/eli/reg/2024/2847/oj)
+- [Directive (EU) 2022/2555 — NIS2 Directive](https://eur-lex.europa.eu/eli/dir/2022/2555/oj)
+- [Regulation (EU) 2016/679 — General Data Protection Regulation (GDPR)](https://eur-lex.europa.eu/eli/reg/2016/679/oj)
+- [GDPR Article 9 — Processing of Special Categories of Personal Data](https://gdpr-info.eu/art-9-gdpr/)
+
+**Other Jurisdictions**
+- [Criminal Code Act 1995 (Australia), Part 10.7](https://www.legislation.gov.au/C2004A04868/latest/text)
+- [Criminal Code (Canada), Section 342.1](https://laws-lois.justice.gc.ca/eng/acts/c-46/page-73.html)
+- [Computer Misuse Act (Singapore)](https://sso.agc.gov.sg/Act/CMA1993)
+- [Cybersecurity Act 2018 (Singapore)](https://sso.agc.gov.sg/Act/CA2018)
+- [Act on Prohibition of Unauthorized Computer Access (Japan)](https://www.japaneselawtranslation.go.jp/en/laws/view/2441)
+
+**Industry Standards and Frameworks**
+- [OWASP Mobile Application Security Testing Guide (MASTG)](https://mas.owasp.org/MASTG/)
+- [OWASP Mobile Application Security Verification Standard (MASVS)](https://mas.owasp.org/MASVS/)
+- [HackerOne — Vulnerability Disclosure Programs](https://www.hackerone.com/)
+- [Bugcrowd — Bug Bounty Platform](https://www.bugcrowd.com/)
+- [Intigriti — Bug Bounty Platform](https://www.intigriti.com/)
