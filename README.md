@@ -91,21 +91,16 @@ npm run dev
 
 The site runs at `http://localhost:4321/AndroidRedTeam/`.
 
-## Cursor Agent Skills
+## AI Agent Skills
 
-If you use [Cursor](https://cursor.sh/), this repo ships two Agent Skills that give the AI assistant the full red team methodology:
+This repo ships two knowledge files in `skills/` that give any AI coding agent the full red team methodology:
 
 | Skill | What It Does |
 |-------|-------------|
-| `skills/android-red-team.md` | 41 sections of operational knowledge — recon, smali patching, injection configs, anti-tamper evasion, Kotlin patterns, a full one-pass recon script, worked hook examples, and a troubleshooting error index. The agent can write patches, generate configs, and diagnose failures. |
-| `skills/android-red-team-verify.md` | 8-phase post-patch verification checklist. The agent systematically checks signing, permissions, payloads, hook initialization, and evidence collection. |
+| `skills/android-red-team.md` | 41 sections of operational knowledge — recon, smali patching, injection configs, anti-tamper evasion, Kotlin patterns, a full one-pass recon script, worked hook examples, and a troubleshooting error index. |
+| `skills/android-red-team-verify.md` | 8-phase post-patch verification checklist — signing, permissions, payloads, hook initialization, and evidence collection. |
 
-```bash
-cp skills/android-red-team.md .cursor/skills/
-cp skills/android-red-team-verify.md .cursor/skills/
-```
-
-Then ask the agent to decode, patch, or verify — it has the domain knowledge to execute end-to-end.
+Works with **Cursor**, **Windsurf**, **Cline**, **GitHub Copilot**, **Aider**, or any LLM — just load the files into your agent's context. See [Chapter 4](https://iamjosephmj.github.io/AndroidRedTeam/book/foundations/04-the-lab/) for setup instructions per agent.
 
 ## Who Is This For
 

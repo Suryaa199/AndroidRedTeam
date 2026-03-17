@@ -393,9 +393,9 @@ The materials kit includes [`materials/scripts/lab-health-check.sh`](https://git
 
 ---
 
-## Cursor Agent Skills
+## AI Agent Skills
 
-If you use [Cursor](https://cursor.sh/) as your IDE, this repository ships two Agent Skills that turn the AI assistant into a hands-on red team partner. Drop them into your workspace and the agent gains the full methodology from this book -- every recon pattern, every smali technique, every payload format -- ready to use in conversation.
+This repository ships two knowledge files that turn any AI coding agent into a hands-on red team partner. Feed them to your agent and it gains the full methodology from this book -- every recon pattern, every smali technique, every payload format -- ready to use in conversation.
 
 ### `android-red-team.md` -- The Full Toolkit
 
@@ -411,14 +411,18 @@ This skill encodes 41 sections of operational knowledge: the APK repackaging pip
 
 A rigid 8-phase verification checklist the agent follows after every patched build. It covers pre-flight checks (signing, manifest, class placement), install and permissions, payload deployment, cold launch verification, per-hook functional checks, end-to-end flow validation, evidence collection, and reproducibility testing. The agent creates a todo item for each phase and works through them systematically.
 
-### Getting Started
+### Setup by Agent
 
-Copy the skill files into your Cursor workspace:
+The skill files live in `skills/`. How you load them depends on your agent:
 
-```bash
-cp skills/android-red-team.md .cursor/skills/
-cp skills/android-red-team-verify.md .cursor/skills/
-```
+| Agent | Setup |
+|-------|-------|
+| **Cursor** | `cp skills/*.md .cursor/skills/` |
+| **Windsurf** | `cp skills/*.md .windsurf/skills/` |
+| **Cline** | Add as custom instructions or drop into `.cline/` |
+| **GitHub Copilot** | Add to `.github/copilot-instructions.md` or reference in chat |
+| **Aider** | Pass with `--read skills/android-red-team.md` |
+| **Any LLM** | Paste the file contents into the system prompt or context window |
 
 Then ask the agent anything -- "decode this APK and run recon", "write a smali patch to bypass this signature check", "verify my patched build is ready for deployment." The skills give it the domain knowledge to execute like a practitioner, not just suggest.
 
