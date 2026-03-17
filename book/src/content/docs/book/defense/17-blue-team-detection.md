@@ -856,7 +856,7 @@ After RASP processing:
 
 Opaque predicates — conditions that always evaluate one way but appear data-dependent — force the analyst to trace through each branch to determine which path is live. The goal: increase the time-per-check from seconds to minutes, and make the analyst uncertain whether they have found all real checks.
 
-#### d) Native (.so) Layer Enforcement
+#### d) Native (.so) Layer Enforcement + Native Obfuscation
 
 RASP SDKs implement their core integrity engine in compiled native code (C/C++), called via JNI. Native code is fundamentally harder to reverse than smali:
 
@@ -894,6 +894,72 @@ RASP SDKs implement their core integrity engine in compiled native code (C/C++),
 ```
 
 The key insight: the native layer does not just report results — it controls an internal `integrity_state` value that downstream processing depends on. Removing the JNI calls from smali does not fix the problem; it removes the state initialization, which defaults to "tampered."
+
+##### Native code obfuscation: OLLVM and custom obfuscators
+
+Moving checks into a `.so` file is only the first step. Without obfuscation, a skilled reverse engineer can still load the library into IDA or Ghidra, read the pseudocode, and patch the binary. RASP SDKs raise the bar dramatically by applying **compiler-level obfuscation** to the native layer — most commonly based on OLLVM (Obfuscator-LLVM) or proprietary equivalents.
+
+OLLVM operates at the LLVM intermediate representation (IR) level, transforming the code **before** it is compiled to ARM/x86 machine code. The transformations include:
+
+**Control flow flattening** — The compiler replaces the function's natural if/else/switch structure with a single giant switch statement inside a while loop. Every basic block becomes a case in the switch, and the "next block" is determined by a state variable that is updated at the end of each case. The original control flow graph — which a decompiler uses to reconstruct readable pseudocode — is destroyed. IDA and Ghidra produce a single enormous function body with no recognizable structure.
+
+```text
+Original function (readable in IDA):
+
+  rasp_verify():
+      if (checkSig()) {
+          if (checkDex()) {
+              state = VALID;
+          } else {
+              state = TAMPERED;
+          }
+      }
+      return state;
+
+
+After OLLVM control flow flattening (what IDA sees):
+
+  rasp_verify():
+      switch_var = 0x7A3F;
+      while (true) {
+          switch (switch_var) {
+              case 0x7A3F: ... switch_var = 0x1D82; break;
+              case 0x1D82: ... switch_var = 0x4E09; break;
+              case 0x4E09: ... switch_var = 0xB371; break;
+              case 0xB371: ... switch_var = 0x5CA4; break;
+              case 0x5CA4: return state;
+              // 20-50 more cases, some real, some bogus
+          }
+      }
+
+  No if/else visible. No function structure.
+  Decompiler output is a wall of switch cases.
+```
+
+**Bogus control flow insertion** — The obfuscator injects conditional branches that depend on opaque predicates (expressions that always evaluate to the same value but appear data-dependent). The decompiler cannot prove these branches are dead, so it includes them. The analyst must manually verify each branch — and there can be hundreds.
+
+**Instruction substitution** — Simple operations (`a + b`, `a == 0`) are replaced with mathematically equivalent but unreadable sequences. A single comparison becomes a chain of XORs, rotates, and arithmetic that produces the same result but hides the intent.
+
+**String encryption in native code** — Strings within the `.so` are encrypted at compile time and decrypted inline at each use site. Unlike Java-level string encryption (which can be hooked at the `String` constructor), native string decryption happens in registers and is never visible as a complete string in memory unless the analyst breaks at the exact instruction.
+
+**The size effect:** A RASP native library that would be 2-3 MB unobfuscated can balloon to **15-25 MB** after aggressive OLLVM passes. This is not a bug — it is a feature. The expanded size means more code for the analyst to wade through, more bogus branches to trace, and longer decompilation times. IDA's auto-analysis on a 20 MB obfuscated `.so` can take 30-60 minutes before producing any output, and the output is largely unreadable.
+
+```text
+Native library size comparison:
+
+  No obfuscation:       2-3 MB    IDA analysis: ~2 min    Readable pseudocode
+  Basic OLLVM:          8-12 MB   IDA analysis: ~15 min   Partially readable
+  Aggressive OLLVM:     15-25 MB  IDA analysis: ~45 min   Wall of switch cases
+  Custom obfuscator:    15-25 MB  IDA analysis: ~60 min   Unrecognizable
+
+  Each level multiplies the analyst's time by 5-10x.
+```
+
+**Custom obfuscators** — Some RASP vendors go beyond OLLVM and implement proprietary obfuscation passes: custom encoding schemes for function dispatch, virtual machine-based protection (the `.so` contains a bytecode interpreter that executes the real logic from an embedded bytecode stream), and anti-decompilation traps (instruction sequences that crash IDA's decompiler). These are the hardest protections to reverse because there is no public tooling to undo them — the analyst must build custom deobfuscation scripts from scratch.
+
+**For defenders:** When selecting a RASP SDK, ask the vendor specifically about their native obfuscation strategy. Control flow flattening and bogus control flow insertion are table stakes. String encryption in native code prevents trivial string searches. The combination of all four — flattening, bogus flows, instruction substitution, and string encryption — is what makes the `.so` layer genuinely expensive to reverse. Without obfuscation, native code is merely inconvenient; with it, native code becomes a significant time investment for even experienced analysts.
+
+**For red teamers assessing RASP-protected targets:** If you encounter a `.so` file larger than 10 MB that produces unreadable pseudocode in IDA/Ghidra, you are almost certainly looking at OLLVM-level obfuscation. Budget days, not hours, for native-layer analysis. Consider whether cutting at the JNI bridge (smali-level) is sufficient before investing in binary reverse engineering.
 
 #### e) Integrity-Coupled Processing: Play Integrity + RASP (Silent Failure)
 
