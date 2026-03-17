@@ -8,7 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Android Biometric Bypass',
-			description: 'Injecting cameras, sensors & location to defeat Android identity verification',
+			description: 'APK tampering, camera injection, GPS spoofing & sensor manipulation against Android identity verification',
 			logo: {
 				src: './src/assets/logo.svg',
 				alt: 'Android Biometric Bypass',
