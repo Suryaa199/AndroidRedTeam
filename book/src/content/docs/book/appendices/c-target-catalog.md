@@ -204,10 +204,4 @@ Over time, the catalog becomes a diffing baseline. When you receive a target you
 
 ## Reference
 
-The canonical YAML template is maintained at:
-
-```text
-materials/templates/target-catalog-template.yaml
-```
-
-Copy it as a starting point for each new target entry. The template includes inline comments explaining every field.
+Use the YAML schema documented above as a starting point for each new target entry.

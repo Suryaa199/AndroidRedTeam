@@ -277,8 +277,6 @@ Every section serves one of these questions. There is no filler. If a section do
 
 ### Report Template
 
-The materials kit includes ready-to-use templates at `materials/templates/engagement-report-template.md` and `materials/templates/recon-report-template.md`. Use them as starting points for your engagements.
-
 ```markdown
 # Engagement Report: Biometric Verification Bypass Assessment
 

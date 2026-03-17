@@ -539,7 +539,7 @@ pipeline:
     logcat_timeout: 15
     collect_evidence: true
   - phase: report
-    template: materials/templates/engagement-report-template.md
+    template: engagement-report.md
 ```
 
 A runner script reads this YAML, executes each phase for each target, and produces the report. The engagement configuration is version-controlled. You can diff it between quarters to see what changed. You can hand it to another operator and they reproduce your results exactly. You can run it in CI on a schedule.
