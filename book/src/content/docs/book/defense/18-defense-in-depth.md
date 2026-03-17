@@ -97,9 +97,9 @@ Without RASP:                          With RASP:
   Bypass time: 15-30 minutes             Bypass time: days to weeks
 ```
 
-The critical technique is **integrity-coupled processing** (Chapter 17, Defense 7e): RASP feeds Play Integrity verdicts into the app's processing pipeline, silently degrading outputs on tampered builds. The attacker sees the app running, sees frames being processed, but every session fails server-side — and there is no crash, no log, and no stack trace pointing to the cause. Combined with server-side liveness (Layer 4), this creates a system where the attacker must defeat both client integrity and server challenges simultaneously, with no debuggable feedback from either.
+The critical technique is **integrity-coupled processing**: RASP feeds Play Integrity verdicts into the app's processing pipeline, silently degrading outputs on tampered builds. The attacker sees the app running, sees frames being processed, but every session fails server-side — and there is no crash, no log, and no stack trace pointing to the cause. Combined with server-side liveness (Layer 4), this creates a system where the attacker must defeat both client integrity and server challenges simultaneously, with no debuggable feedback from either.
 
-See Chapter 17, Section 7 for the full technical breakdown of each RASP technique.
+See the [RASP deep dive](/AndroidRedTeam/book/defense/17b-rasp/) for the full technical breakdown of each technique.
 
 ---
 

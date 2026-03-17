@@ -72,8 +72,9 @@ export default defineConfig({
 						{
 							label: 'Part V: Defense',
 							items: [
-								{ label: '17. Blue Team Detection', slug: 'book/defense/17-blue-team-detection' },
-								{ label: '18. Defense-in-Depth', slug: 'book/defense/18-defense-in-depth' },
+							{ label: '17. Blue Team Detection', slug: 'book/defense/17-blue-team-detection' },
+							{ label: '17b. RASP Deep Dive', slug: 'book/defense/17b-rasp' },
+							{ label: '18. Defense-in-Depth', slug: 'book/defense/18-defense-in-depth' },
 							],
 						},
 						{
