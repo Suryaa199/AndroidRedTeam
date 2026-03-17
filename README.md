@@ -97,8 +97,8 @@ This repo ships two knowledge files in `skills/` that give any AI coding agent t
 
 | Skill | What It Does |
 |-------|-------------|
-| `skills/android-red-team.md` | 41 sections of operational knowledge — recon, smali patching, injection configs, anti-tamper evasion, Kotlin patterns, a full one-pass recon script, worked hook examples, and a troubleshooting error index. |
-| `skills/android-red-team-verify.md` | 8-phase post-patch verification checklist — signing, permissions, payloads, hook initialization, and evidence collection. |
+| [`skills/android-red-team.md`](skills/android-red-team.md) | 41 sections of operational knowledge — recon, smali patching, injection configs, anti-tamper evasion, Kotlin patterns, a full one-pass recon script, worked hook examples, and a troubleshooting error index. |
+| [`skills/android-red-team-verify.md`](skills/android-red-team-verify.md) | 8-phase post-patch verification checklist — signing, permissions, payloads, hook initialization, and evidence collection. |
 
 Works with **Cursor**, **Windsurf**, **Cline**, **GitHub Copilot**, **Aider**, or any LLM — just load the files into your agent's context. See [Chapter 4](https://iamjosephmj.github.io/AndroidRedTeam/book/foundations/04-the-lab/) for setup instructions per agent.
 

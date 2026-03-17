@@ -397,7 +397,7 @@ The materials kit includes [`materials/scripts/lab-health-check.sh`](https://git
 
 This repository ships two knowledge files that turn any AI coding agent into a hands-on red team partner. Feed them to your agent and it gains the full methodology from this book -- every recon pattern, every smali technique, every payload format -- ready to use in conversation.
 
-### `android-red-team.md` -- The Full Toolkit
+### [`android-red-team.md`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/skills/android-red-team.md) -- The Full Toolkit
 
 This skill encodes 41 sections of operational knowledge: the APK repackaging pipeline, reconnaissance methodology, all three hook patterns, camera/location/sensor injection configs, anti-tamper evasion techniques, native JNI defense handling, asset manipulation, Kotlin-specific smali patterns, feature flag exploitation, split APK handling, and more. When loaded, the agent can:
 
@@ -407,7 +407,7 @@ This skill encodes 41 sections of operational knowledge: the APK repackaging pip
 - Diagnose `VerifyError` and other common failures
 - Walk through the full engagement cycle from decode to report
 
-### `android-red-team-verify.md` -- Post-Patch Verification
+### [`android-red-team-verify.md`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/skills/android-red-team-verify.md) -- Post-Patch Verification
 
 A rigid 8-phase verification checklist the agent follows after every patched build. It covers pre-flight checks (signing, manifest, class placement), install and permissions, payload deployment, cold launch verification, per-hook functional checks, end-to-end flow validation, evidence collection, and reproducibility testing. The agent creates a todo item for each phase and works through them systematically.
 
