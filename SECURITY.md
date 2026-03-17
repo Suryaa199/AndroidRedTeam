@@ -12,14 +12,13 @@ services, or APIs.
 If you discover a security issue in the **documentation site**, build
 pipeline, or any script shipped in this repository:
 
-1. **Do not open a public issue.**
-2. Email **security@iamjosephmj.dev** (or use GitHub's private vulnerability
-   reporting: _Security → Report a vulnerability_ on this repository).
-3. Include:
+1. [Open an issue](https://github.com/iamjosephmj/AndroidRedTeam/issues/new)
+   on this repository.
+2. Include:
    - Description of the issue
    - Steps to reproduce
    - Potential impact
-4. You will receive an acknowledgment within **72 hours** and a resolution
+3. You will receive an acknowledgment within **72 hours** and a resolution
    timeline within **7 days**.
 
 ## What is NOT in scope

@@ -51,7 +51,8 @@ Violations may result in:
 
 ## Reporting
 
-If you witness or experience a violation, contact **security@iamjosephmj.dev**
+If you witness or experience a violation,
+[open an issue](https://github.com/iamjosephmj/AndroidRedTeam/issues/new)
 or use GitHub's reporting tools. Reports will be reviewed promptly and kept
 confidential.
 
