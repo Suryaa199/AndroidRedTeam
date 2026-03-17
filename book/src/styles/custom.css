@@ -265,7 +265,12 @@ nav.sidebar a[aria-current='true'] {
 
 .sl-heading-wrapper {
 	--sl-anchor-icon-size: 0.6em;
-	--sl-anchor-icon-gap: 0.2em;
+	--sl-anchor-icon-gap: 0.125em;
+}
+
+.sl-heading-wrapper .sl-anchor-icon > svg {
+	transform: translateY(calc((var(--sl-line-height-headings) * 1em - var(--sl-anchor-icon-size)) / 2 - 2px));
+	margin-inline-start: 2px;
 }
 
 .sl-markdown-content > hr {
