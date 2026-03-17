@@ -264,15 +264,25 @@ nav.sidebar a[aria-current='true'] {
 .sl-markdown-content li::marker { color: var(--sl-color-gray-3); }
 
 :root .sl-markdown-content .sl-heading-wrapper {
-	--sl-anchor-icon-size: 0.6em;
-	--sl-anchor-icon-gap: 0.15em;
-	--sl-anchor-icon-space: calc(0.6em + 0.15em);
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+}
+
+:root .sl-markdown-content .sl-heading-wrapper > :first-child {
+	padding-inline-end: 0;
+}
+
+:root .sl-markdown-content .sl-heading-wrapper .sl-anchor-link {
+	margin-inline-start: 0;
+	display: inline-flex;
+	align-items: center;
 }
 
 :root .sl-markdown-content .sl-heading-wrapper .sl-anchor-icon > svg {
-	width: 0.6em;
-	transform: translateY(calc((var(--sl-line-height-headings) * 1em - 0.6em) / 2 - 1px));
-	margin-inline-start: 2px;
+	width: 0.55em;
+	height: 0.55em;
+	transform: none;
 }
 
 .sl-markdown-content > hr {
