@@ -301,6 +301,11 @@ nav.sidebar a[aria-current='true'] {
 	font-weight: 500;
 	color: var(--drac-green);
 }
+:root[data-theme='light'] .sl-markdown-content :not(pre) > code {
+	background: #f0fdf4;
+	border-color: #bbf7d0;
+	color: #15803d;
+}
 
 /* ============================================================
    CODE BLOCKS
