@@ -97,6 +97,12 @@ Security professionals conducting **authorized** testing of Android identity ver
 
 **No prior reverse engineering experience required.** Part I covers the foundations.
 
+## Support
+
+If you find this useful, consider buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/iamjosephmj" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height="48"></a>
+
 ## License
 
 This material is provided for educational and authorized security testing purposes.
