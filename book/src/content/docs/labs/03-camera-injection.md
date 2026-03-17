@@ -47,7 +47,57 @@ ffmpeg -i face_photo.jpg -vf "scale=640:480" face_frames/face_neutral/001.png
 
 A single frame will loop -- the same image repeats on every callback. This passes basic face detection but will fail any active liveness check that expects motion (blinking, head turns). For this lab, a single frame is sufficient to demonstrate injection and ML Kit detection.
 
-**Option C: Generate a synthetic test frame**
+**Option C: Generate a synthetic face frame (no selfie needed)**
+
+If you do not want to use your own face, you can generate a synthetic face image using Python and Pillow. This draws a simple oval face with eyes, nose, and mouth -- enough geometric structure for ML Kit to detect as a face in most lighting conditions.
+
+```bash
+pip install Pillow
+```
+
+```bash
+python3 -c "
+from PIL import Image, ImageDraw
+
+img = Image.new('RGB', (640, 480), (200, 180, 160))
+draw = ImageDraw.Draw(img)
+
+# Face oval
+draw.ellipse([200, 60, 440, 400], fill=(220, 195, 170), outline=(180, 160, 140), width=2)
+
+# Eyes
+draw.ellipse([260, 160, 310, 195], fill=(255, 255, 255))
+draw.ellipse([330, 160, 380, 195], fill=(255, 255, 255))
+draw.ellipse([275, 170, 295, 190], fill=(60, 40, 30))
+draw.ellipse([345, 170, 365, 190], fill=(60, 40, 30))
+
+# Nose
+draw.polygon([(318, 220), (305, 275), (335, 275)], fill=(200, 175, 155))
+
+# Mouth
+draw.arc([285, 290, 355, 340], start=0, end=180, fill=(180, 100, 100), width=3)
+
+# Eyebrows
+draw.arc([255, 140, 315, 170], start=180, end=360, fill=(120, 90, 70), width=3)
+draw.arc([325, 140, 385, 170], start=180, end=360, fill=(120, 90, 70), width=3)
+
+img.save('synthetic_face.png')
+print('Generated synthetic_face.png (640x480)')
+"
+```
+
+Then prepare it as a frame sequence:
+
+```bash
+mkdir -p face_frames/face_neutral
+cp synthetic_face.png face_frames/face_neutral/001.png
+```
+
+This single synthetic frame will loop on every callback. ML Kit may or may not detect it as a face depending on the model version -- the geometric features are simple but provide enough structure for basic detection. If ML Kit does not detect a face, you will still see `FRAME_DELIVERED` and `intercept swapped ImageProxy` in logcat, confirming the injection pipeline works. Use Option A or B for reliable face detection.
+
+A ready-to-use version of this script is included in the materials kit at [`materials/payloads/frames/generate-synthetic-face.sh`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/materials/payloads/frames/generate-synthetic-face.sh).
+
+**Option D: Generate gray test frames (pipeline verification only)**
 
 If you want to verify the pipeline without any face at all, you can use the gray test frames from Lab 2. ML Kit will not detect a face, but you will still see the injection pipeline operating in logcat. This is useful for confirming the mechanics before introducing real face data.
 

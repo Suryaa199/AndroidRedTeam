@@ -907,6 +907,113 @@ Result: full bypass. Both the face check and geofence pass with synthetic data. 
 
 ---
 
+## NFC and Passport Chip Reading
+
+Some KYC flows add a fifth verification surface: NFC reading of the chip embedded in e-Passports, national ID cards, and some driver's licenses. The app instructs the user to hold their document against the back of the phone. The NFC controller reads the chip, extracts the biometric data stored on it (face photo, fingerprints, document data), and cross-references it against the selfie and OCR data from earlier steps.
+
+This is the one verification surface that the current toolkit does not hook at the API level. Understanding why -- and what your options are -- matters for engagements where NFC reading is part of the flow.
+
+### How e-Passport NFC Works
+
+ICAO Doc 9303 defines the standard. Every compliant e-Passport contains a contactless chip with data organized into Data Groups:
+
+| Data Group | Contents | Read Protection |
+|------------|----------|-----------------|
+| DG1 | MRZ data (name, DOB, passport number, expiry) | BAC |
+| DG2 | Face photograph (JPEG2000 or JPEG) | BAC |
+| DG3 | Fingerprints (if stored) | EAC (Extended Access Control) |
+| DG14 | Security infos for chip authentication | BAC |
+| SOD | Document Security Object (signed hash of all DGs) | BAC |
+
+**BAC (Basic Access Control)** is the first gate. The app must derive an encryption key from the MRZ (Machine Readable Zone) -- the two lines of text at the bottom of the passport's photo page. The key is computed from the passport number, date of birth, and expiry date. Without the correct MRZ data, the chip refuses to communicate. This is why apps ask you to scan or photograph the MRZ before attempting NFC -- they need those three fields to unlock the chip.
+
+**PACE (Password Authenticated Connection Establishment)** is the modern replacement for BAC, used in newer documents. It provides stronger encryption but serves the same purpose: prove you have physical access to the document before releasing its data.
+
+**Passive Authentication** verifies that the data on the chip has not been modified since issuance. The SOD contains hashes of every Data Group, signed by the issuing country's Document Signer Certificate (which chains to the Country Signing CA). The app validates this signature chain to confirm data integrity.
+
+**Active Authentication** (or Chip Authentication) proves the chip itself is genuine -- not a clone. The chip performs a cryptographic challenge-response using a private key that never leaves the secure element. This is the hardest layer to defeat because the key is hardware-bound.
+
+### The Android NFC Stack
+
+Android's NFC stack for passport reading typically flows through:
+
+```text
+NfcAdapter
+  -> Tag discovered (ACTION_TECH_DISCOVERED)
+  -> IsoDep.connect()
+  -> IsoDep.transceive(APDU commands)
+     -> SELECT application (A0000002471001)
+     -> BAC/PACE mutual authentication
+     -> READ BINARY for each Data Group
+```
+
+Apps that read passports use libraries like **JMRTD** (Java Machine Readable Travel Documents) which abstracts the low-level APDU communication into high-level calls: `PassportService.doBAC()`, `PassportService.getInputStream(DG2)`, etc.
+
+### Why NFC Is Different from Other Surfaces
+
+Camera, location, and sensor injection all work by intercepting software callbacks -- the app calls an Android API, and the hook replaces the response with your data. NFC reading involves a hardware-to-hardware communication channel between the phone's NFC controller and the document's contactless chip. The data flows through `IsoDep.transceive()`, which sends raw APDU byte arrays to the chip and receives raw byte arrays back.
+
+You *can* hook `IsoDep.transceive()` at the smali level -- it is a regular method call like any other. The challenge is that you need to provide cryptographically correct responses. The BAC/PACE handshake involves mutual authentication with session keys derived from the MRZ. The Passive Authentication signature chain must validate against known Country Signing CAs. Active Authentication requires a response from a private key embedded in the chip's secure element.
+
+In short: you can intercept the NFC communication channel, but fabricating valid responses requires either a real chip to proxy through or a complete simulation of the document's cryptographic state.
+
+### Recon for NFC Surfaces
+
+During your standard recon, add these patterns to detect NFC passport reading:
+
+```bash
+# NFC tag handling
+grep -rn "NfcAdapter\|ACTION_TECH_DISCOVERED\|IsoDep" decoded/smali*/
+
+# JMRTD library (most common passport reading library)
+grep -rl "org/jmrtd" decoded/smali*/
+grep -rn "PassportService\|BACKeySpec\|PACEKeySpec" decoded/smali*/
+
+# Data group reading
+grep -rn "DG1\|DG2\|DG_1\|DG_2\|LDS\|SOD" decoded/smali*/
+
+# Manifest: NFC intent filters
+grep -n "TECH_DISCOVERED\|NFC" decoded/AndroidManifest.xml
+```
+
+If JMRTD is present, the app reads passport chips. Record which Data Groups it accesses -- DG1 (MRZ data) and DG2 (face photo) are most common for KYC.
+
+### Operational Approaches
+
+When a KYC flow includes NFC passport reading, you have three options:
+
+**Option 1: Use a real document.** The simplest approach. If the engagement scope permits, use a genuine passport or ID card for the NFC step. The camera injection handles the selfie and document photo steps; the NFC read uses the real chip. This is the most common approach in authorized assessments because the NFC step is usually not the vulnerability being tested -- the camera and location bypass is.
+
+**Option 2: Proxy through a real chip.** Place the real document on a separate NFC reader connected to your workstation. Hook `IsoDep.transceive()` in the app to relay APDU commands to the real chip via the external reader and return the real responses. The app thinks it is communicating directly with a chip held against the phone. This is technically complex but allows you to operate without physical proximity to the document during execution.
+
+**Option 3: Skip the NFC step.** Some apps allow you to bypass the NFC step entirely -- either through an explicit "skip" option, a timeout fallback, or by navigating directly to the next activity. Check whether the NFC step is mandatory or optional:
+
+```bash
+# Look for skip/fallback logic in the NFC activity
+grep -rn "skip\|fallback\|retry\|timeout" decoded/smali*/com/target/nfc/
+```
+
+If the flow permits skipping NFC, the engagement focuses on the surfaces you can fully control: camera, location, and sensors.
+
+### What to Report
+
+When NFC reading is present but not bypassed, document it explicitly:
+
+```text
+NFC / Passport Chip Reading
+  - JMRTD library present: YES
+  - Data Groups accessed: DG1, DG2
+  - BAC/PACE: BAC (MRZ-derived key)
+  - Active Authentication: Present
+  - Status: NOT BYPASSED -- used real document per engagement scope
+  - Note: NFC chip authentication provides hardware-bound verification
+    that resists client-side bypass. This is a strong defense layer.
+```
+
+The presence of NFC chip verification with Active Authentication is a positive security finding. Unlike camera frames and GPS coordinates, the chip's private key cannot be extracted or replicated through software alone. Recommend that clients who want to strengthen their KYC pipeline consider making NFC verification mandatory (not optional) and implementing Active Authentication validation server-side.
+
+---
+
 ## What Comes Next
 
 This chapter gave you the operational methodology -- the four-phase cycle that structures every engagement. Chapter 11 goes deeper on the reporting side: evidence standards, how to write findings that get taken seriously, and the art of recommendations that actually lead to fixes.

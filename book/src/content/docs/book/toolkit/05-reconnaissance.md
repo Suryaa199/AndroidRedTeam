@@ -563,6 +563,17 @@ echo "  Certificate pinning:"
 grep -rn 'CertificatePinner' "$DIR"/smali*/ 2>/dev/null | wc -l | tr -d ' '
 
 echo ""
+echo "--- ASSETS & CONFIGS ---"
+echo "  JSON configs:"
+find "$DIR"/assets/ "$DIR"/res/raw/ -name "*.json" 2>/dev/null || echo "    none"
+echo "  ML models:"
+find "$DIR"/assets/ "$DIR"/res/raw/ -name "*.tflite" -o -name "*.onnx" -o -name "*.pt" 2>/dev/null || echo "    none"
+echo "  Remote Config defaults:"
+[ -f "$DIR/res/xml/remote_config_defaults.xml" ] && echo "    FOUND" || echo "    not found"
+echo "  Properties/config files:"
+find "$DIR"/assets/ "$DIR"/res/raw/ -name "*.properties" -o -name "*.cfg" -o -name "*.yaml" 2>/dev/null || echo "    none"
+
+echo ""
 echo "=========================================="
 ```
 

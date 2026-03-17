@@ -9,11 +9,43 @@ description: "Find and neutralize four layers of defense in a hardened target"
 >
 > **Chapter reference:** Chapter 15 -- Anti-Tamper Evasion.
 >
-> **Target:** `materials/targets/target-hardened-kyc.apk` if available. This lab requires a target with anti-tamper defenses -- [`materials/targets/target-kyc-basic.apk`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/materials/targets/target-kyc-basic.apk) does **not** have these defenses and cannot substitute here.
+> **Target:** A real-world APK with anti-tamper defenses. The course materials do not include a pre-built hardened target -- **this is intentional.** Every target in Labs 0-9 was provided for you. This lab reflects the real world: you source the target yourself.
 
 Every target in the previous labs was defenseless. No integrity checks, no signature verification, no awareness of tampering. You patched them, installed them, and injection worked immediately. That was training. This is the real thing.
 
-The target is a face verification app with four layers of protection. Each defense independently kills the app or blocks functionality. You need to neutralize all four before the injection hooks can operate.
+### Finding Your Target
+
+The standard course target ([`target-kyc-basic.apk`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/materials/targets/target-kyc-basic.apk)) has no anti-tamper defenses and cannot be used for this lab. You need a target with real integrity checks. Two approaches:
+
+**Option A: Use any app with anti-tamper defenses (recommended).** Pull a real application from an emulator or device -- banking apps, fintech onboarding apps, and identity verification apps almost always have at least signature verification and often certificate pinning. This is the closest you will get to a real engagement in a training context.
+
+```bash
+# Find an installed app
+adb shell pm list packages | grep -iE "bank|finance|verify|kyc"
+
+# Pull it
+adb shell pm path <package>
+adb pull <path> target-hardened.apk
+```
+
+Choose an app you are authorized to test. Apps you install yourself on your own emulator are fair game for personal research. Do not test apps you do not own or have authorization for.
+
+**Option B: Harden the course target yourself.** If you completed Lab 12 (Build a Target), you know how to build an Android app. Add the four defense patterns from Chapter 15 to the course target source code, build it, and use it as your hardened target. This option teaches you both sides: building defenses and breaking them.
+
+### What to Look For
+
+Regardless of which target you choose, the lab methodology is the same. A hardened target typically has some combination of these defenses:
+
+| Defense | What to Grep For | Failure Behavior |
+|---------|-----------------|-----------------|
+| **Signature verification** | `getPackageInfo`, `GET_SIGNATURES`, `MessageDigest` | App crashes on launch |
+| **DEX integrity check** | `classes.dex`, `getCrc`, `ZipEntry` | Silent feature block or crash |
+| **Installer verification** | `getInstallingPackageName`, `com.android.vending` | Warning dialog, then exit |
+| **Certificate pinning** | `CertificatePinner`, `network_security_config.xml` | Network requests fail |
+
+Your target may not have all four. It may have defenses not listed here (root detection, emulator detection, Frida detection). That is fine -- the methodology adapts. Use the recon patterns from Chapter 15 to find whatever defenses exist, then neutralize each one.
+
+If you try to run the patch-tool against a hardened target and install the result without evasion work, the app will crash or malfunction at whatever defense fires first. You must identify and defeat each one in order.
 
 ---
 
@@ -37,8 +69,7 @@ Your patched APK triggers all four: it has a different signature (you re-signed 
 ### Decode the APK
 
 ```bash
-cd /Users/josejames/Documents/android-red-team
-apktool d materials/targets/target-hardened-kyc.apk -o decoded-hardened/
+apktool d target-hardened.apk -o decoded-hardened/
 ```
 
 ### Systematic Defense Scan
@@ -335,8 +366,8 @@ The app should launch without integrity failures AND show frame injection active
 
 ## Success Criteria
 
-- [ ] All four defenses identified with file paths and method names
-- [ ] All four defenses neutralized without breaking app functionality
+- [ ] All defenses identified with file paths and method names
+- [ ] Every defense neutralized without breaking app functionality
 - [ ] App launches without integrity failures after evasion patching
 - [ ] Evasion patches survive the patch-tool re-patching
 - [ ] Injection hooks apply successfully on top of evasion patches
@@ -423,7 +454,7 @@ echo ""
 echo "  Manual checks:"
 echo "    1. App launches without security warnings or crash dialogs"
 echo "    2. Frame injection overlay shows ACTIVE"
-echo "    3. Defense recon report documents all 4 defenses with file paths"
+echo "    3. Defense recon report documents all defenses found, with file paths"
 echo "    4. Neutralization log shows specific smali changes for each defense"
 echo "=========================================="
 [ "$FAIL" -eq 0 ] && echo "  Lab 10 COMPLETE." || echo "  Lab 10 INCOMPLETE -- review failed checks."
@@ -431,10 +462,48 @@ echo "=========================================="
 
 ---
 
+## Bonus Phase: Native Defense Recon (Dry Run)
+
+Most real-world targets do not include native (JNI) integrity checks -- but some do, especially apps that integrate commercial anti-tamper SDKs. Practice the recon patterns from Chapter 15's "Native Code (JNI) Defenses" section against your target so you are ready when you encounter native defenses.
+
+### Step 1: Scan for Native Methods
+
+```bash
+grep -rn "\.method.*native" decoded-hardened/smali*/
+```
+
+### Step 2: List Native Libraries
+
+```bash
+find decoded-hardened/lib/ -name "*.so" -exec ls -lhS {} \;
+```
+
+### Step 3: Search for Defense Strings in .so Files
+
+```bash
+for so in decoded-hardened/lib/arm64-v8a/*.so; do
+    echo "=== $(basename $so) ==="
+    strings "$so" | grep -iE "integrity|signature|verify|tamper|root|debug" | head -5
+done
+```
+
+### Step 4: Document Your Findings
+
+Record in your defense recon report:
+
+- How many native methods were found?
+- Do any have names suggesting integrity checks?
+- Do any `.so` files contain defense-related strings?
+- If a native integrity check existed, which approach from Chapter 15 would you use? (Cut at the JNI bridge, patch the `.so`, or delete the library?)
+
+If your target has no native integrity checks, that confirms all defenses are in the Java layer and Techniques 1 through 5 from Chapter 15 (nop, force return, patch hash, nop SDK init, cert pinning bypass) are sufficient. If you do find native defenses, apply the JNI bridge techniques from Chapter 15 -- cut at the bridge first, resort to binary patching only if needed.
+
+---
+
 ## What You Just Demonstrated
 
-Four independent defense layers -- any one of which would have blocked a naive patching attempt. Signature verification catches re-signing. DEX integrity catches class injection. Installer verification catches sideloading. Certificate pinning catches API interception.
+This was the first lab where the target fought back -- and the first lab where you sourced your own target. That is not an accident. In the real world, nobody hands you a pre-decoded APK with a map of its defenses. You pull it off a device, crack it open, find what's guarding it, and dismantle the guards one by one.
 
-You neutralized all of them with the same fundamental technique: find the check in smali, understand what it does, and modify it so it passes instead of fails. The specifics vary (nop a branch, force a return value, patch a hash, modify an XML config), but the methodology is always the same: recon the defense, understand its logic, neutralize it at the bytecode level.
+The defenses you encountered -- whether two or four or six -- all share the same fundamental weakness: they run on a device you control, in bytecode you can read. Signature verification, DEX integrity, installer checks, certificate pinning, root detection -- the specifics vary, but the methodology is always the same: recon the defense, understand its logic, neutralize it at the bytecode level.
 
-This is the technique that takes the toolkit from "works against cooperative targets" to "works against production apps with real security investments." Every hardened target uses some combination of these four patterns. Now you know how to find and defeat each one.
+You neutralized real defenses in a real app with the same techniques from Chapter 15. The specifics varied (nop a branch, force a return value, patch a hash, modify an XML config), but the pattern held. This is the technique that takes the toolkit from "works against cooperative targets" to "works against production apps with real security investments."

@@ -238,6 +238,65 @@ The recommended approach: read a chapter, then immediately do the corresponding 
 
 ---
 
+## What You'll Build
+
+By the end of this book, you will have a working toolkit that intercepts every data source a KYC application consumes -- and a methodology for using it against real targets. Here is what the end state looks like.
+
+### The Patched APK
+
+You take a target APK, run a single command, and get back a weaponized version with 1,134 injected runtime classes. The patch-tool handles everything: decoding, injecting hook classes into a new DEX file, patching the app's entry points, rebuilding, aligning, and signing. The output tells you exactly which hooks fired and which were skipped:
+
+```text
+[+] Injected 1134 runtime smali files into smali_classes7/
+[+] Detected: com.poc.PocApplication
+[+] Patched Application.onCreate()
+[+] Patched toBitmap() in 1 file(s)
+[+] Patched analyze() in 1 method(s)
+[+] Patched onCaptureSuccess() in 1 method(s)
+[+] Patched onLocationResult() in 1 method(s)
+[!] No onSensorChanged(SensorEvent) found -- target may not use SensorEventListener
+```
+
+Every `[+]` is a hook that is now active. Every `[!]` is a surface the target does not use -- confirmed by your recon before you ever ran the tool.
+
+### The Overlay
+
+When you launch the patched app, a lightning bolt icon appears in the top-right corner. Tap it to open the control panel. Three modules -- camera, location, and sensor -- each with a toggle, a status indicator, and configuration controls. You switch frame sources mid-flow, update GPS coordinates in real time, and adjust sensor profiles without restarting the app. The user experience of the original app is identical -- the overlay is the only visible difference.
+
+### Camera Injection in Action
+
+You push a folder of face images to the device. The app opens its camera. Instead of the live feed, it sees your injected frames. Google ML Kit runs face detection on your frames and draws bounding boxes around the face -- a face that is not physically in front of the camera. The liveness check passes. The delivery log confirms every frame was accepted:
+
+```text
+FrameStore: loaded 47 frames from /sdcard/poc_frames/face_neutral/
+FrameInterceptor: armed, source: face_neutral
+FrameInterceptor: FRAME_DELIVERED [frame 1/47]
+FrameInterceptor: FRAME_CONSUMED
+FrameInterceptor: intercept swapped ImageProxy
+```
+
+### GPS Spoofing with Mock Detection Bypass
+
+You push a JSON config with Times Square coordinates. The app queries `FusedLocationProviderClient` and receives your coordinates -- with realistic jitter, fresh timestamps, and `isFromMockProvider()` returning `false`. The geofence check passes. The app thinks the device is in Manhattan.
+
+### The Delivery Report
+
+At the end of an engagement, you extract delivery statistics that document every injection event across all three subsystems:
+
+```text
+Frame:    delivered=47 consumed=45 rate=95.7%
+Location: delivered=12 callback=12 mock_bypassed=12
+Sensor:   delivered=89 listener=89 rate=100%
+```
+
+These numbers go into an engagement report with screenshots, logcat dumps, and actionable recommendations for the client. The report is the deliverable -- the bypass is just the means.
+
+### The Full Picture
+
+The complete workflow -- from a stock APK to a documented bypass of a multi-step KYC flow -- takes about an hour once you have practiced it. Thirty minutes of recon, five minutes of patching, fifteen minutes of execution, and the rest on reporting. By Chapter 10, you will run this cycle end-to-end against a practice target with face capture, liveness detection, and geofencing. By Chapter 14, you will build custom hooks for targets the standard toolkit does not cover. By Chapter 18, you will understand both sides -- how to break verification and how to build it so it resists this class of attack.
+
+---
+
 ## What Comes Next
 
-Before you touch any tool, before you decode a single APK, you need to understand the rules of the game. Chapter 2 defines the boundaries: what authorized testing looks like, what the legal landscape looks like, and the ethical framework that separates a security professional from an attacker. The techniques are the same — the authorization is what makes the difference.
+Before you touch any tool, before you decode a single APK, you need to understand the rules of the game. Chapter 2 defines the boundaries: what authorized testing looks like, what the legal landscape looks like, and the ethical framework that separates a security professional from an attacker. The techniques are the same -- the authorization is what makes the difference.

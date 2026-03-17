@@ -228,6 +228,477 @@ Find `CertificatePinner.check()` calls and nop them, or find `CertificatePinner$
 
 ---
 
+## Attacking Unprotected App Assets
+
+Not every bypass requires smali patching. Many apps ship configuration files, ML models, threshold values, and business rules as plain files inside the APK -- in `assets/`, `res/raw/`, or embedded in resource XML. These files control verification behavior directly: a liveness threshold, a geofence radius, a feature flag that enables or disables a check, a TensorFlow Lite model that decides whether a face is real. If these assets have no integrity protection -- and most do not -- you can modify them during the decode/rebuild cycle without touching a single line of smali.
+
+This is the lowest-effort, highest-reliability attack class. You are not patching bytecode. You are not navigating control flow. You are editing a JSON file or swapping a binary blob. The app loads the modified asset at runtime and trusts it completely.
+
+### What Lives in Assets
+
+After decoding with apktool, inventory the assets:
+
+```bash
+# List everything in assets/
+find decoded/assets/ -type f | head -30
+
+# List raw resources
+ls decoded/res/raw/ 2>/dev/null
+
+# Find JSON config files
+find decoded/assets/ decoded/res/raw/ -name "*.json" 2>/dev/null
+
+# Find ML models
+find decoded/assets/ decoded/res/raw/ \
+  -name "*.tflite" -o -name "*.onnx" -o -name "*.pt" -o -name "*.mlmodel" \
+  2>/dev/null
+
+# Find XML config files that might contain thresholds
+find decoded/assets/ decoded/res/raw/ -name "*.xml" 2>/dev/null
+
+# Find properties/config files
+find decoded/assets/ decoded/res/raw/ \
+  -name "*.properties" -o -name "*.cfg" -o -name "*.conf" -o -name "*.yaml" \
+  2>/dev/null
+```
+
+Common findings in KYC and biometric apps:
+
+| File Type | Typical Location | What It Controls |
+|-----------|-----------------|-----------------|
+| `.tflite` | `assets/face_detection.tflite` | On-device ML model for face detection, liveness, or anti-spoofing |
+| `.json` | `assets/sdk_config.json` | SDK initialization parameters, thresholds, feature flags |
+| `.json` | `assets/liveness_config.json` | Liveness challenge sequence, timeout values, score thresholds |
+| `.xml` | `res/xml/remote_config_defaults.xml` | Firebase Remote Config defaults -- feature flags and A/B test values |
+| `.properties` | `assets/app.properties` | API endpoints, environment toggles, debug flags |
+| `.json` | `assets/geofence.json` | Geofence coordinates, allowed regions, radius values |
+| `.dat` / `.bin` | `assets/model.dat` | Encrypted or proprietary model data |
+
+### JSON Config Manipulation
+
+The most common and most impactful target. Many liveness SDKs ship a JSON config that controls their behavior:
+
+```bash
+# Read the SDK config
+cat decoded/assets/sdk_config.json
+```
+
+A typical config might look like:
+
+```json
+{
+  "liveness_threshold": 0.85,
+  "face_quality_min": 0.6,
+  "max_retries": 3,
+  "timeout_seconds": 30,
+  "require_blink": true,
+  "require_head_turn": true,
+  "anti_spoof_enabled": true,
+  "debug_mode": false,
+  "geofence_radius_km": 50,
+  "mock_detection_enabled": true
+}
+```
+
+Every one of these values is an attack surface:
+
+| Modification | Effect |
+|-------------|--------|
+| `"liveness_threshold": 0.01` | Liveness check passes with almost any input |
+| `"face_quality_min": 0.01` | Accepts blurry, dark, or partial face frames |
+| `"max_retries": 999` | Unlimited attempts to pass verification |
+| `"timeout_seconds": 9999` | Effectively disables the session timeout |
+| `"require_blink": false` | Removes the blink challenge from active liveness |
+| `"require_head_turn": false` | Removes the head turn challenge |
+| `"anti_spoof_enabled": false` | Disables the anti-spoofing model entirely |
+| `"debug_mode": true` | May enable verbose logging, skip checks, or show internal state |
+| `"mock_detection_enabled": false` | Disables mock location detection at the config level |
+
+Edit the JSON, rebuild, and the SDK runs with your parameters. No smali patching needed.
+
+### Finding Threshold Values in Code
+
+Some apps do not use external config files -- they hardcode threshold values directly in the source. These appear as constants in smali:
+
+```bash
+# Find float constants that look like thresholds (0.0 to 1.0 range)
+grep -rn "const.*0\.\[0-9\]" decoded/smali*/ | grep -iE "threshold|confidence|score|quality|min"
+
+# Find hardcoded geofence values
+grep -rn "const.*40\.\|const.*-73\.\|const.*37\." decoded/smali*/
+
+# Find string constants with config-like names
+grep -rn "const-string.*threshold\|const-string.*config\|const-string.*enable" decoded/smali*/
+```
+
+When thresholds are hardcoded, you change them with a simple `const` replacement in smali -- still simpler than full control-flow patching.
+
+### ML Model Replacement
+
+Apps that run on-device ML for face detection, liveness, or document verification ship model files (usually `.tflite` for TensorFlow Lite). These models are loaded at runtime from `assets/`:
+
+```bash
+# Find model loading code
+grep -rn "loadModel\|Interpreter\|tflite\|tensorflow\|onnx" decoded/smali*/
+
+# Find the model file reference
+grep -rn "const-string.*\.tflite\|const-string.*\.onnx" decoded/smali*/
+```
+
+Three attack vectors on unprotected models:
+
+**1. Replace with a permissive model.** Train or obtain a model that accepts all inputs as valid. Replace the `.tflite` file in `assets/`. The SDK loads your model and every face passes liveness, every document passes authenticity checks.
+
+**2. Replace with a no-op model.** Create a minimal TFLite model that returns a constant "pass" output regardless of input. This requires matching the expected input/output tensor shapes -- inspect the original model with:
+
+```bash
+python3 -c "
+import tensorflow as tf
+interpreter = tf.lite.Interpreter(model_path='decoded/assets/face_detection.tflite')
+interpreter.allocate_tensors()
+print('Input:', interpreter.get_input_details())
+print('Output:', interpreter.get_output_details())
+"
+```
+
+**3. Downgrade the model.** Some SDKs ship multiple model variants (e.g., `model_v3.tflite` and `model_v1.tflite`). Older models are typically less accurate at detecting spoofing. If the config references a specific model filename, point it at the weaker variant.
+
+### Firebase Remote Config Defaults
+
+Many apps use Firebase Remote Config for feature flags. The defaults are shipped in the APK at `res/xml/remote_config_defaults.xml`:
+
+```bash
+cat decoded/res/xml/remote_config_defaults.xml
+```
+
+```xml
+<defaultsMap>
+    <entry>
+        <key>liveness_enabled</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>nfc_required</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>geofence_check</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>min_face_score</key>
+        <value>0.85</value>
+    </entry>
+</defaultsMap>
+```
+
+These defaults apply when the app cannot reach Firebase (offline, first launch before fetch completes, or network issues). Edit them to disable checks or lower thresholds. If the app has a connectivity issue during your test, it falls back to your modified defaults.
+
+Note: if the app successfully fetches remote config from Firebase, the server values override these defaults. This attack is most effective when the device is offline or when you also block Firebase connectivity.
+
+### Encrypted and Obfuscated Assets
+
+Not every asset is plain text. Commercial liveness SDKs frequently encrypt their config files or ship them as proprietary binary formats. When you open a file and see binary data or base64-encoded content instead of readable JSON, the SDK decrypts it at runtime.
+
+To find the decryption logic:
+
+```bash
+# Find where the app reads the asset file
+grep -rn "const-string.*sdk_config\|const-string.*liveness\|const-string.*model" decoded/smali*/
+
+# Find decryption operations near asset loading
+grep -rn "Cipher\|SecretKey\|AES\|decrypt\|Base64\.decode" decoded/smali*/
+
+# Find the class that opens the asset and trace forward
+grep -rn "AssetManager\|openRawResource\|getAssets" decoded/smali*/
+```
+
+The typical pattern: the app opens the asset file, reads the bytes, passes them through a decryption method, then parses the result as JSON or feeds it to a model loader. The decryption key is usually hardcoded in the same class or in a companion constants class -- it has to be, because the app needs it at runtime without any server round-trip.
+
+Once you find the key and algorithm (usually AES-256-CBC or AES-128-GCM), you have three options:
+
+1. **Decrypt, modify, re-encrypt.** Write a small script that uses the same key and algorithm to decrypt the asset, edit the plaintext, and re-encrypt. Replace the file in `decoded/assets/`.
+2. **Replace the encrypted file with plaintext and patch the loader.** Remove the decryption call in smali (nop it or bypass it) so the app reads the file directly. Then replace the encrypted asset with your plaintext version.
+3. **Hook the decryption output.** If the decryption is complex or uses multiple layers, it may be easier to let it run and patch the code that consumes the decrypted output -- forcing the threshold value after parsing rather than before.
+
+Option 2 is usually the cleanest. The decryption is typically a single `invoke-static` or `invoke-virtual` call that you can nop, then the downstream code parses plaintext JSON from the raw bytes.
+
+### SharedPreferences Defaults
+
+Some apps ship default preference values in `res/xml/` that get loaded the first time the app runs. These can contain feature flags, threshold values, or toggle switches:
+
+```bash
+# Find preference XML files
+find decoded/res/xml/ -name "*prefer*" -o -name "*settings*" -o -name "*config*" 2>/dev/null
+
+# Search for preference references in smali
+grep -rn "getDefaultSharedPreferences\|PreferenceManager" decoded/smali*/
+```
+
+A preferences defaults file might look like:
+
+```xml
+<PreferenceScreen>
+    <CheckBoxPreference
+        android:key="enable_liveness"
+        android:defaultValue="true" />
+    <EditTextPreference
+        android:key="face_score_threshold"
+        android:defaultValue="0.85" />
+    <CheckBoxPreference
+        android:key="require_location"
+        android:defaultValue="true" />
+</PreferenceScreen>
+```
+
+Change `android:defaultValue="true"` to `"false"` for checks you want to disable, or lower the numeric defaults. These values apply on first launch or when the app calls `PreferenceManager.setDefaultValues()`. If the app has already been installed and populated its SharedPreferences, you may need to clear its data first (`adb shell pm clear <package>`) for the new defaults to take effect.
+
+### String Resources and Hardcoded Values
+
+`res/values/strings.xml` is often overlooked as an attack surface. It can contain:
+
+```bash
+cat decoded/res/values/strings.xml | grep -iE "api|key|url|endpoint|secret|threshold|token"
+```
+
+Common findings:
+
+```xml
+<!-- API endpoints -- useful for understanding backend communication -->
+<string name="base_url">https://api.target.com/v2/</string>
+
+<!-- API keys shipped in the APK (yes, this happens) -->
+<string name="sdk_api_key">sk_live_abc123xyz789</string>
+
+<!-- Hardcoded geofence parameters -->
+<string name="allowed_country_code">US</string>
+<string name="geofence_center_lat">40.7580</string>
+<string name="geofence_center_lng">-73.9855</string>
+```
+
+Modifying string resources follows the same decode-edit-rebuild cycle. Change the API endpoint to point to your proxy server. Change the country code to match your spoofed location. Change the geofence center to coordinates you control.
+
+Also check for locale-specific overrides in `res/values-*/strings.xml` -- some apps define different endpoints or parameters per language or region.
+
+### Worked Example: Lowering a Liveness Threshold
+
+Here is a concrete end-to-end example against a target that ships a liveness config in its assets.
+
+**Step 1: Decode and inventory**
+
+```bash
+apktool d target-kyc.apk -o decoded/
+find decoded/assets/ -type f
+```
+
+Output includes `decoded/assets/verification_config.json`.
+
+**Step 2: Read the config**
+
+```bash
+cat decoded/assets/verification_config.json
+```
+
+```json
+{
+  "version": 2,
+  "face_detection": {
+    "model": "face_detect_v3.tflite",
+    "min_confidence": 0.80
+  },
+  "liveness": {
+    "enabled": true,
+    "threshold": 0.85,
+    "challenges": ["blink", "turn_left", "turn_right"],
+    "timeout_ms": 15000
+  },
+  "anti_spoof": {
+    "enabled": true,
+    "model": "spoof_detect_v2.tflite",
+    "threshold": 0.70
+  }
+}
+```
+
+**Step 3: Modify**
+
+```bash
+python3 -c "
+import json
+with open('decoded/assets/verification_config.json', 'r') as f:
+    c = json.load(f)
+c['liveness']['threshold'] = 0.01
+c['liveness']['challenges'] = []
+c['liveness']['timeout_ms'] = 999000
+c['anti_spoof']['enabled'] = False
+c['face_detection']['min_confidence'] = 0.10
+with open('decoded/assets/verification_config.json', 'w') as f:
+    json.dump(c, f, indent=2)
+"
+```
+
+What changed:
+- Liveness threshold dropped from 0.85 to 0.01 -- almost anything passes
+- Active challenges removed -- no blink or head turn required
+- Timeout extended to 999 seconds -- effectively no time pressure
+- Anti-spoof model disabled entirely
+- Face detection confidence lowered to 0.10 -- accepts partial or blurry faces
+
+**Step 4: Rebuild, align, sign, install**
+
+```bash
+apktool b decoded/ -o modified.apk
+zipalign -f 4 modified.apk aligned.apk
+apksigner sign --ks ~/.android/debug.keystore \
+  --ks-key-alias androiddebugkey --ks-pass pass:android aligned.apk
+adb uninstall com.target.kyc 2>/dev/null
+adb install aligned.apk
+```
+
+**Step 5: Verify**
+
+```bash
+adb shell am start -n com.target.kyc/.LauncherActivity
+adb logcat -s LivenessSDK FaceDetection
+```
+
+Watch logcat. If the config was loaded successfully, you should see the SDK initializing with your modified values. A log line like `LivenessSDK: threshold=0.01, challenges=0` confirms the modified config is active. Now even a gray rectangle passes face detection, and liveness requires no user interaction.
+
+**Step 6: Layer injection on top**
+
+The asset modification made the SDK permissive. Now add the injection hooks for full control:
+
+```bash
+java -jar patch-tool.jar aligned.apk --out final.apk --work-dir ./work
+adb install -r final.apk
+```
+
+You now have a target with lowered thresholds AND active frame injection. The lowered thresholds mean your injected frames face a much easier bar to clear. This is the belt-and-suspenders approach: even if frame injection alone would have passed the original thresholds, the lowered thresholds eliminate any margin of error.
+
+### Asset Integrity: Why Most Apps Don't Check
+
+Most apps do not verify the integrity of their own asset files. The assumption is: the APK was signed, so the contents are authentic. But after you decode with apktool, modify assets, and rebuild, the new APK is signed with YOUR key. The signing is valid -- it is just a different signer. Unless the app also performs signature verification (covered earlier in this chapter), modified assets are trusted.
+
+Even apps that check their signing certificate rarely extend that check to individual asset files. Signature verification confirms the APK was signed by a specific key -- it does not verify that every file inside is unmodified since original build time. A few commercial anti-tamper SDKs do compute checksums over specific asset files, but this is uncommon.
+
+When you do encounter asset integrity checking, the recon patterns from the DEX integrity section apply -- look for file reading and hashing operations targeting `assets/` paths. Neutralize them with the same techniques.
+
+### Recon Checklist for Assets
+
+Add these to your standard recon workflow:
+
+```text
+[ ] Inventory assets/ directory -- list all JSON, XML, model, and config files
+[ ] Read every JSON config file -- note thresholds, flags, and toggleable features
+[ ] Identify ML model files -- note format (.tflite, .onnx) and filename
+[ ] Check res/xml/remote_config_defaults.xml for feature flags
+[ ] Search smali for asset loading code -- which files does the app read at runtime?
+[ ] Check for asset integrity verification -- does the app hash its own assets?
+[ ] Document modifiable values in your recon report under a new "Asset Attack Surface" section
+```
+
+### The Edit-Rebuild-Resign Workflow
+
+Asset modifications use the same apktool decode/rebuild pipeline as smali patching. Here is the complete cycle for asset-only changes:
+
+**Step 1: Decode**
+
+```bash
+apktool d target.apk -o decoded/
+```
+
+**Step 2: Edit the assets directly**
+
+The decoded directory mirrors the APK structure. Edit files in place:
+
+```bash
+# Edit a JSON config -- lower the liveness threshold
+# Use any text editor or sed for simple changes
+vi decoded/assets/sdk_config.json
+
+# Or use a one-liner for targeted edits
+python3 -c "
+import json
+with open('decoded/assets/sdk_config.json', 'r') as f:
+    config = json.load(f)
+config['liveness_threshold'] = 0.01
+config['anti_spoof_enabled'] = False
+with open('decoded/assets/sdk_config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+"
+
+# Replace an ML model with your modified version
+cp my_permissive_model.tflite decoded/assets/face_detection.tflite
+
+# Edit Firebase Remote Config defaults
+vi decoded/res/xml/remote_config_defaults.xml
+
+# Edit network security config (for cert pinning bypass)
+vi decoded/res/xml/network_security_config.xml
+```
+
+There is no special syntax or tooling needed. The files are plain text (JSON, XML) or binary blobs (models) sitting in a regular directory. Edit them however you want.
+
+**Step 3: Rebuild**
+
+```bash
+apktool b decoded/ -o modified.apk
+```
+
+apktool repackages everything -- your modified assets, the original smali (unless you also patched that), the manifest, the resources -- into a new APK. If the build fails, apktool will tell you which resource has a syntax error. JSON files are not validated by apktool, so malformed JSON will build fine but crash the app at runtime -- always test.
+
+**Step 4: Align**
+
+```bash
+zipalign -f 4 modified.apk aligned.apk
+```
+
+zipalign ensures uncompressed data in the APK is aligned to 4-byte boundaries. This is required for efficient memory-mapped access on the device. Skip this step and the install may fail or the app may run slowly.
+
+**Step 5: Sign**
+
+```bash
+apksigner sign \
+  --ks ~/.android/debug.keystore \
+  --ks-key-alias androiddebugkey \
+  --ks-pass pass:android \
+  aligned.apk
+```
+
+This signs the APK with your debug key. The signing is cryptographically valid -- it just uses a different key than the original developer's. Android accepts this for sideloaded installs. If the app was previously installed with a different signature, uninstall it first (`adb uninstall <package>`).
+
+If you do not have a debug keystore, create one:
+
+```bash
+keytool -genkeypair -v -keystore debug.keystore \
+  -alias androiddebugkey -keyalg RSA -keysize 2048 \
+  -validity 10000 -storepass android -keypass android \
+  -dname "CN=Debug,O=Android,C=US"
+```
+
+**Step 6: Install and test**
+
+```bash
+adb uninstall com.target.package 2>/dev/null
+adb install aligned.apk
+adb shell am start -n com.target.package/.LauncherActivity
+```
+
+Watch logcat for crashes. If the app reads your modified JSON and hits a missing key or wrong type, you will see a `JSONException` or `NullPointerException` in the log. Fix the asset and repeat from Step 3 -- no need to re-decode.
+
+**Combining with smali patches and injection hooks.** If you are also modifying smali or running the patch-tool, the order matters:
+
+1. Decode with apktool
+2. Edit assets (configs, models, XML)
+3. Edit smali (if doing manual evasion patches)
+4. Rebuild with apktool
+5. Optionally run the patch-tool against the rebuilt APK (it re-decodes and adds injection hooks)
+6. Align and sign the final APK
+
+Asset edits and smali edits happen in the same decoded directory during the same cycle. There is no need for separate passes. The patch-tool in step 5 preserves your asset modifications -- it adds classes to a new DEX file but does not touch `assets/` or `res/`.
+
+---
+
 ## Choosing a Technique: The Decision Flowchart
 
 Selecting the right evasion technique is not guesswork. It follows a decision tree based on what you find during recon. Here is the expanded flowchart:
@@ -512,7 +983,222 @@ Even with the right technique, evasion patches can fail in predictable ways. Her
 
 ---
 
-Anti-tamper defenses are speed bumps, not walls. They slow you down, they force you to do recon before injection, and they add steps to your workflow. But they share a fundamental limitation: they run on a device you control, in bytecode you can read and modify. The app cannot hide its own defense logic from someone willing to read smali. Every check has a call site, every call site has a branch, and every branch can be neutralized.
+## Native Code (JNI) Defenses
+
+Everything above operates in the Dalvik/ART layer -- smali bytecode you can read, modify, and rebuild. Some targets push critical logic into native code: compiled C/C++ in `.so` files inside the APK's `lib/` directory. Commercial liveness SDKs, anti-tamper frameworks, and high-security biometric processors frequently move their core algorithms and integrity checks into native libraries. When they do, smali patching alone is not enough.
+
+### Recognizing Native Defenses
+
+During recon, detect JNI usage with these patterns:
+
+```bash
+# Find native method declarations in smali
+grep -rn "\.method.*native" decoded/smali*/
+
+# Find System.loadLibrary calls (loading .so files)
+grep -rn "loadLibrary\|System\.load" decoded/smali*/
+
+# List all native libraries in the APK
+ls decoded/lib/*/
+
+# Find JNI_OnLoad (library initialization entry point)
+strings decoded/lib/arm64-v8a/*.so | grep -i "JNI_OnLoad\|integrity\|verify\|signature"
+```
+
+Common patterns that indicate native defenses:
+
+| Pattern | What It Means |
+|---------|---------------|
+| `native checkIntegrity()Z` in a SecurityManager class | The integrity check runs in C, not Java |
+| `.so` files from a commercial anti-tamper vendor | Entire protection suite in native code |
+| `JNI_OnLoad` with string references to `classes.dex` | The library verifies DEX integrity at load time |
+| Native method that accepts Context and returns boolean | Classic JNI integrity check pattern |
+
+### The JNI Bridge
+
+A native integrity check has two parts: the Java/Kotlin declaration and the C implementation.
+
+**Java side (visible in smali):**
+
+```smali
+.method public static native checkNativeIntegrity(Landroid/content/Context;)Z
+.end method
+```
+
+The `native` keyword means the method body is not in the DEX file -- it is in a `.so` library. When the app calls this method, the JVM looks up the corresponding C function in the loaded library and executes it.
+
+**C side (compiled into the .so):**
+
+```c
+JNIEXPORT jboolean JNICALL
+Java_com_target_security_NativeCheck_checkNativeIntegrity(
+    JNIEnv *env, jclass clazz, jobject context) {
+    // Read APK, hash DEX, verify signature -- all in native code
+    // Return JNI_TRUE or JNI_FALSE
+}
+```
+
+The smali for the call site looks like any other method call:
+
+```smali
+invoke-static {v0}, Lcom/target/security/NativeCheck;->checkNativeIntegrity(Landroid/content/Context;)Z
+move-result v1
+if-eqz v1, :native_check_failed
+```
+
+### Three Approaches to Native Defenses
+
+#### Approach 1: Cut at the JNI Bridge (Recommended)
+
+The native method is called from Java code. The result is consumed by Java code. You do not need to touch the `.so` at all -- intercept at the boundary.
+
+**Option A: Force the return at the call site.** Find the `invoke-static/invoke-virtual` that calls the native method and the `if-eqz/if-nez` that branches on the result. Apply the same Technique 1 (nop the branch) or Technique 2 (force the return) you use for Java checks.
+
+```smali
+# Original:
+invoke-static {v0}, Lcom/target/security/NativeCheck;->checkNativeIntegrity(Landroid/content/Context;)Z
+move-result v1
+if-eqz v1, :native_check_failed
+
+# Neutralized -- force v1 to true before the branch:
+invoke-static {v0}, Lcom/target/security/NativeCheck;->checkNativeIntegrity(Landroid/content/Context;)Z
+move-result v1
+const/4 v1, 0x1
+if-eqz v1, :native_check_failed
+```
+
+The native code still runs -- but its result is overwritten before the branch evaluates it.
+
+**Option B: Replace the native declaration with a Java implementation.** Remove the `native` keyword and provide a method body:
+
+```smali
+# Original:
+.method public static native checkNativeIntegrity(Landroid/content/Context;)Z
+.end method
+
+# Replaced:
+.method public static checkNativeIntegrity(Landroid/content/Context;)Z
+    .locals 1
+    const/4 v0, 0x1
+    return v0
+.end method
+```
+
+The native function in the `.so` is never called because the method is no longer declared as `native`. The JVM executes your Java implementation instead. The `.so` file can stay untouched in the APK.
+
+**Option C: Prevent the library from loading.** If the entire `.so` is an anti-tamper SDK you want to disable, nop the `System.loadLibrary()` call:
+
+```smali
+# Original:
+const-string v0, "security_native"
+invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
+
+# Neutralized:
+nop
+nop
+```
+
+Without `loadLibrary`, the native methods remain declared but have no implementation. If the app calls them, it crashes with `UnsatisfiedLinkError`. Make sure you also neutralize or replace every call site (Option A or B above) so the native methods are never invoked.
+
+#### Approach 2: Patch the .so Binary
+
+When cutting at the JNI bridge is not feasible -- for example, when the native library performs continuous validation that the Java layer queries repeatedly, or when the SDK's Java code is heavily obfuscated and hard to trace -- you may need to modify the `.so` directly.
+
+**Tools:**
+
+- **Ghidra** (free, open source from NSA) -- disassembler and decompiler for ARM/ARM64 binaries. Handles Android `.so` files natively. The decompiler produces readable C-like pseudocode.
+- **IDA Pro** (commercial) -- the industry standard for binary reverse engineering. More polished decompiler, better handling of complex optimizations.
+- **Binary Ninja** (commercial) -- modern alternative with strong scripting support.
+- **radare2/rizin** (free) -- command-line focused, steep learning curve, but highly scriptable.
+
+**The workflow:**
+
+1. Extract the `.so` from `decoded/lib/arm64-v8a/` (or the appropriate architecture).
+2. Open in Ghidra. The auto-analysis takes a few minutes on large libraries.
+3. Find the JNI function. Search for the mangled name: `Java_com_target_security_NativeCheck_checkNativeIntegrity`. JNI function names follow a predictable pattern derived from the Java package, class, and method name.
+4. Read the decompiled output. Identify the return path -- the instruction that sets the return value.
+5. Patch: change the function to immediately return the desired value.
+
+**ARM64 patch example:**
+
+```text
+; Original function epilogue:
+; ... (validation logic) ...
+; mov w0, w19    ; w0 = result of validation
+; ret
+
+; Patched:
+mov w0, #1       ; force return true
+ret
+```
+
+In Ghidra: right-click the instruction, "Patch Instruction," change `mov w0, w19` to `mov w0, #1`. Then export the patched binary ("File > Export Program > ELF").
+
+6. Replace the `.so` in `decoded/lib/arm64-v8a/` with your patched version.
+7. If the APK supports multiple architectures (`armeabi-v7a`, `x86_64`), you must patch each architecture's `.so` or remove the directories you do not need (and ensure the target device matches the remaining architecture).
+
+**When to use this approach:** Only when Approach 1 fails. Binary patching is more fragile -- it depends on the exact binary layout, which changes with every SDK update. Prefer cutting at the JNI bridge when possible.
+
+#### Approach 3: Delete or Replace the Library
+
+The nuclear option. If the `.so` is a standalone anti-tamper SDK with no other functionality the app depends on:
+
+1. Delete the `.so` from all architecture directories.
+2. Nop the `System.loadLibrary()` call.
+3. Replace all native method declarations with Java stubs that return safe defaults.
+4. Nop or replace the SDK initialization call in `Application.onCreate()`.
+
+This is appropriate for third-party anti-tamper SDKs that exist solely for protection. It is not appropriate for SDKs where the `.so` contains functionality the app needs (biometric processing, cryptographic operations, ML inference).
+
+### Identifying What Lives in Native Code
+
+Not all `.so` files contain defenses. Most are runtime dependencies. Focus your analysis:
+
+```bash
+# List all .so files by size (large files = more logic)
+find decoded/lib/ -name "*.so" -exec ls -lhS {} \;
+
+# Look for security-related strings in each .so
+for so in decoded/lib/arm64-v8a/*.so; do
+    echo "=== $(basename $so) ==="
+    strings "$so" | grep -iE "integrity|signature|verify|tamper|root|debug|frida|xposed|mock" | head -5
+done
+
+# Common native defense libraries to watch for
+strings decoded/lib/arm64-v8a/*.so | grep -iE "dexguard|arxan|appdome|promon|guardsquare|verimatrix"
+```
+
+Libraries with names like `libsecurity.so`, `libprotect.so`, `libguard.so`, or `libantitamper.so` are obvious defense components. Commercial anti-tamper SDKs often use generic names like `libapp.so` or obfuscated names to avoid easy identification -- the string search helps reveal their purpose.
+
+### Decision Tree for Native Defenses
+
+```text
+Found a native defense method?
+  |
+  +-- Is the result consumed by Java code via a simple boolean check?
+  |     |
+  |     +-- YES --> Approach 1: Cut at the JNI bridge
+  |     |           (Force return value or nop the branch at the call site)
+  |     |           This is your default. Do not touch the .so.
+  |     |
+  |     +-- NO  --> Is the .so a standalone anti-tamper SDK?
+  |                 |
+  |                 +-- YES --> Approach 3: Delete the library + stub the methods
+  |                 |
+  |                 +-- NO  --> Does the native code perform continuous
+  |                             validation that is hard to intercept from Java?
+  |                             |
+  |                             +-- YES --> Approach 2: Patch the .so binary
+  |                             +-- NO  --> Re-examine. There is usually a
+  |                                         Java-level interception point
+  |                                         you missed. Trace the call chain.
+```
+
+Approach 1 handles 80-90% of real-world native defenses. The key insight: native code must communicate its results back to Java code through the JNI bridge. That bridge is always visible in smali. You control the smali. You control the bridge.
+
+---
+
+Anti-tamper defenses are speed bumps, not walls. They slow you down, they force you to do recon before injection, and they add steps to your workflow. But they share a fundamental limitation: they run on a device you control, in bytecode you can read and modify. The app cannot hide its own defense logic from someone willing to read smali -- and even native code must cross the JNI bridge back into the managed layer, where you control the outcome. Every check has a call site, every call site has a branch, and every branch can be neutralized.
 
 The real question is not whether you can defeat the defenses. It is how quickly you can identify and neutralize all of them without breaking the app. That is a skill you build through practice. The recon patterns in this chapter will find the checks. The decision flowchart will tell you which technique to apply. The worked example shows the full workflow from recon to verified evasion. Do it ten times and it becomes mechanical. Do it fifty times and you will identify defenses from the grep output alone, without even opening the smali file.
 
