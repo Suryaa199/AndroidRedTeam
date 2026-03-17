@@ -840,10 +840,26 @@ adb install aligned.apk
 - Server-bound payload includes liveness field set by client
 
 ### Server-Side Liveness (harder)
-- Frame quality: ensure natural variation (slight movement, lighting changes)
-- Timing: feed frames at realistic intervals (~30ms = 30fps)
-- Multiple angles: prepare frames showing face at different angles
-- Sensor correlation: match sensor profiles to camera frame sequences
+
+**Detecting server-side liveness during recon:**
+- Proxy the app and observe liveness requests — large payloads (100 KB-5 MB of frame data) indicate server-side analysis; small JSON with `isLive: true` indicates client-side
+- Measure latency between final gesture and verdict — client-side returns in < 100ms; server-side takes 500ms-3s due to network + processing
+- Run 5-10 sessions and compare challenges — server-side implementations vary the challenge per session; client-side uses the same check every time
+- Look for a nonce or session token in the frame submission payload — its presence confirms server-side session tracking
+
+**If confirmed server-side, assess the protocol:**
+- **Nonce reuse:** Capture a full session (nonce + frames + verdict), replay it — if accepted, nonces are not invalidated (Critical)
+- **Timeout enforcement:** Wait beyond the stated timeout before submitting frames — if accepted, attacker has unlimited generation time (Critical)
+- **Challenge space:** Collect challenges from 20-50 sessions; if fewer than 10 unique challenges, all can be pre-recorded (Critical)
+- **Session fixation:** After a completed session (pass or fail), submit new frames with the same session ID — if accepted, unlimited retries (High)
+- **Transport security:** Attempt MITM on the liveness endpoint; check if frames are encrypted within TLS (not just TLS-protected); check for certificate pinning
+
+**Frame injection against server-side liveness:**
+- Frame quality: ensure natural variation (slight movement, lighting changes between frames)
+- Timing: feed frames at realistic intervals (~30ms = 30fps) with natural jitter (not perfectly uniform)
+- Multiple angles: prepare frames showing face at different angles matching the challenge
+- Sensor correlation: match accelerometer/gyroscope profiles to camera frame sequences
+- Inter-frame entropy: never submit identical consecutive frames — server models flag zero-variation sequences
 
 ---
 

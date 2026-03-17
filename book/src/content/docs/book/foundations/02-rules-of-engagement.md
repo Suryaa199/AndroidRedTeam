@@ -56,10 +56,23 @@ The CFAA (18 U.S.C. Section 1030) is the primary federal law governing unauthori
 For mobile application testing:
 - Testing your own application on your own device is generally permissible
 - Testing a client's application under a signed scope agreement establishes authorization
-- Reverse engineering for security research has some protection under Section 1201 exemptions (DMCA), but the boundaries are actively litigated
 - The 2021 *Van Buren v. United States* Supreme Court decision narrowed the scope of "exceeds authorized access" but didn't eliminate it
 
 The CFAA carries both civil and criminal penalties. Civil liability can include actual damages and profits. Criminal penalties range up to 10 years imprisonment for first offenses involving certain types of access.
+
+### United States: DMCA Section 1201 (Anti-Circumvention)
+
+Section 1201 of the Digital Millennium Copyright Act prohibits circumventing "technological protection measures" (TPMs) that control access to copyrighted works. This is directly relevant to the techniques in this book: APK signature verification, DEX integrity checks, and certificate pinning are all arguably TPMs. Bypassing them during security testing could technically be characterized as circumvention.
+
+**The security research exemption (Section 1201(j))** provides a defense for circumvention performed "solely for the purpose of good-faith security research." To qualify, the research must:
+- Be conducted on a lawfully acquired copy of the software
+- Be performed in a controlled environment (not affecting other systems)
+- Not violate any other applicable law (including the CFAA)
+- The information derived from the research must not be used for purposes other than furthering security
+
+**The triennial rulemaking process** — Every three years, the Library of Congress grants temporary exemptions to Section 1201. The 2021 and 2024 rulemaking cycles expanded protections for good-faith security research, broadening the definition to include testing performed under a reasonable belief that the findings would improve security. These exemptions are not permanent — they must be renewed at each rulemaking cycle.
+
+**Practical impact for this book's techniques:** Decompiling an APK, patching signature verification, modifying bytecode, and re-signing the package all involve circumventing access controls. Under a formal engagement with written authorization, the security research exemption provides strong protection. Without authorization, the same actions carry real legal risk. This is one more reason why the scope document and engagement agreement described at the start of this chapter are not optional — they are part of your legal defense.
 
 ### United Kingdom: Computer Misuse Act 1990
 
@@ -78,6 +91,8 @@ The CMA's scope is broad — "causing a computer to perform any function" covers
 The EU's legal landscape for security testing is fragmented across member states, but two frameworks are particularly relevant:
 
 **NIS2 Directive** — The Network and Information Security Directive requires certain organizations to implement security testing as part of their risk management. This creates a regulatory mandate for the kind of testing this book describes, but the testing must still be authorized by the organization being tested.
+
+**Cyber Resilience Act (CRA)** — The CRA (Regulation (EU) 2024/2847, entered into force December 2024, obligations phasing in through 2027) requires manufacturers of products with digital elements — including mobile applications that process identity data — to implement cybersecurity-by-design and maintain coordinated vulnerability disclosure processes. For security testers, the CRA matters in two ways. First, it creates a regulatory expectation that products *will* be tested: manufacturers must identify and document risks, perform security testing, and provide security updates. Second, it mandates that manufacturers establish vulnerability handling processes and accept reports from external researchers. This does not give testers carte blanche — you still need authorization — but it means the manufacturer has a legal obligation to have a disclosure channel and to handle your report. If a vendor refuses to engage with a coordinated disclosure, the CRA gives the reporter more ground to stand on. The CRA applies to the product manufacturer, not to the tester directly; your obligations remain governed by local computer misuse laws and your engagement agreement.
 
 **GDPR** — The General Data Protection Regulation has implications for biometric testing because face images and biometric templates are "special category data" under Article 9. Even in a testing context, handling biometric data requires a lawful basis. In practice, this means:
 - Use synthetic or self-generated face data, not real users' biometric data
@@ -105,6 +120,20 @@ Regardless of jurisdiction:
 4. **Documentation protects you.** Keep the authorization documents, scope agreements, and communication records indefinitely.
 5. **When in doubt, get legal advice.** An hour of attorney time is cheap compared to the consequences of unauthorized access.
 6. **Safe harbor programs help but don't replace scope documents.** Some companies have vulnerability disclosure policies (VDPs) that provide safe harbor for good-faith security research. These are valuable, but they typically cover discovery and reporting — not the systematic, multi-surface testing that a red team engagement entails. For the kind of comprehensive testing this book teaches, a VDP is not sufficient. You need a formal engagement agreement.
+
+### Jurisdiction Quick Reference
+
+| Jurisdiction | Primary Law(s) | Key Offense | Max Penalty | Security Research Exception |
+|---|---|---|---|---|
+| **US** | CFAA (18 U.S.C. §1030) + DMCA §1201 | Unauthorized access; circumvention of access controls | 10 years (CFAA criminal); statutory damages (DMCA) | DMCA §1201(j) security research exemption; triennial rulemaking exemptions (2021, 2024) |
+| **UK** | Computer Misuse Act 1990 | Unauthorized access (§1); unauthorized access with intent (§2); unauthorized modification (§3) | 2-10 years depending on offense | No statutory exemption; authorization is the defense |
+| **EU** | NIS2 Directive + CRA (2024/2847) + GDPR | Varies by member state; NIS2 mandates security testing for covered entities | Varies by member state | CRA mandates vendor vulnerability disclosure processes; GDPR requires lawful basis for biometric data |
+| **Australia** | Criminal Code Act 1995, Part 10.7 | Unauthorized access and modification | 10 years | No broad statutory exemption; authorization required |
+| **Canada** | Criminal Code §342.1 | Unauthorized use of computer | 10 years | No statutory exemption; authorization required |
+| **Singapore** | Computer Misuse Act + Cybersecurity Act 2018 | Unauthorized access and modification | Fines + imprisonment (varies) | Cybersecurity Act 2018 provides framework for authorized testing |
+| **Japan** | Act on Prohibition of Unauthorized Computer Access | Unauthorized access (strict liability) | 3 years or ¥1M fine | Limited exceptions for security research; strict interpretation |
+
+This table is a starting point, not legal advice. Laws change, and the details matter — especially the definition of "authorization" and what constitutes "access" in each jurisdiction. For any real engagement that crosses borders, consult legal counsel familiar with both the tester's and the target's jurisdictions.
 
 ---
 

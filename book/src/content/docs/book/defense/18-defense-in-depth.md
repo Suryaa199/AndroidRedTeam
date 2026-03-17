@@ -192,6 +192,121 @@ Client                              Server
 
 ---
 
+## Assessing Server-Side Liveness (Red Team Perspective)
+
+The sections above describe how to *build* server-side liveness. This section describes how to *test* it during an authorized assessment. The goal is to determine whether a target's server-side implementation actually enforces the protections it claims — nonce uniqueness, challenge unpredictability, timeout enforcement, transport security — or whether gaps exist that an attacker could exploit.
+
+### Detecting Server-Side vs. Client-Side Liveness
+
+Before testing the protocol, confirm that liveness verification actually happens server-side. Many apps claim server-side liveness but perform the decision locally and only send the verdict.
+
+**Network traffic analysis** — Proxy the app through a MITM tool (after bypassing certificate pinning per Chapter 15). During a liveness session, observe whether the app sends raw frames or video data to a server endpoint, or whether it only sends a small JSON payload containing a boolean verdict. If the payload is small (< 10 KB) and contains fields like `isLive: true`, the decision was made locally. If the app uploads several hundred KB to several MB of frame data per session, the server is likely performing the analysis.
+
+**Timing analysis** — Client-side liveness returns a verdict within milliseconds of the user completing the gesture (limited only by local ML inference time). Server-side liveness has network round-trip latency: typically 500ms-3s between the final frame capture and the verdict, depending on server processing time and connection quality. Measure the latency between the last frame capture event (visible in logcat) and the UI update showing the result.
+
+**Challenge variability** — Run 5-10 liveness sessions and record what the app asks the user to do. If the challenge is identical every time (e.g., always "blink"), it may be client-side or the server's challenge pool is minimal. True server-side liveness with a well-designed challenge space produces different gesture sequences across sessions.
+
+**Nonce presence** — Examine the request payloads. Server-side liveness protocols include a session nonce or token in the frame submission. If the frame upload contains no session identifier or nonce, the server cannot tie the response to a specific challenge — a replay may be possible.
+
+```text
+Indicators of client-side liveness:
+
+  Small payload (< 10 KB), contains verdict directly
+  Instant response (< 100ms after final gesture)
+  Same challenge every session
+  No nonce or session token in request
+
+
+Indicators of server-side liveness:
+
+  Large payload (100 KB - 5 MB), contains frame data
+  Response latency 500ms-3s (network + processing)
+  Different challenges across sessions
+  Session nonce embedded in frame submission
+```
+
+### Protocol-Level Assessment
+
+Once you've confirmed server-side liveness, assess the protocol for implementation weaknesses.
+
+**Nonce reuse testing** — Capture a complete liveness session (challenge, nonce, frame payload, verdict). Replay the exact same frame payload with the same nonce to the same endpoint. If the server accepts the replayed session, nonces are not being invalidated after use. This is a critical finding — it means pre-recorded sessions can be replayed indefinitely.
+
+**Challenge predictability** — Collect challenges from 20-50 sessions. Analyze the distribution:
+- Are challenges drawn from a small, fixed pool (e.g., always one of 3 gestures)?
+- Is there a pattern in the ordering (e.g., always "blink" first)?
+- Does the challenge correlate with any observable input (time of day, device ID)?
+
+A small or predictable challenge space allows the attacker to pre-record a response for every possible challenge.
+
+**Timeout enforcement** — Start a liveness session, capture the challenge and nonce, then wait beyond the stated timeout (e.g., 30 seconds, 60 seconds, 5 minutes) before submitting frames. If the server accepts late submissions, the timeout is not enforced. This gives an attacker unlimited time to generate synthetic frames matching the challenge.
+
+**Session fixation** — After completing a session (pass or fail), attempt to submit a new frame payload using the same session ID. If the server accepts the second submission, sessions are not being invalidated after completion. This allows an attacker to retry indefinitely until a submission passes.
+
+**Verdict manipulation** — If the server returns a signed token or JWT upon successful liveness, test whether the token can be reused across different identity verification flows, or whether it is bound to a specific user session. An unbound token could be harvested from one legitimate session and replayed during a fraudulent one.
+
+### Transport Security Assessment
+
+Server-side liveness is only as secure as the channel carrying the frames.
+
+**Certificate pinning** — Attempt to proxy the liveness endpoint through a MITM tool with a custom CA certificate. If traffic is interceptable without bypassing pinning, frames and challenges travel in plaintext (to the proxy). This enables an attacker to read challenges, modify frames in transit, or replay captured sessions.
+
+**Frame encryption** — Even with TLS, examine whether the frame data within the request body is additionally encrypted. Some implementations encrypt frame payloads with a session-derived key so that a MITM (even one that has bypassed TLS pinning) sees only ciphertext. If frames are plaintext within the TLS stream, a pinning bypass exposes the entire liveness flow.
+
+**Server authentication** — Verify that the app validates the server's identity, not just the TLS certificate. Some implementations use mutual TLS (mTLS) or embed an app-specific token that the server validates. Without this, a MITM could stand up a fake liveness server that always returns "pass."
+
+### Challenge Space Analysis
+
+The strength of challenge-response liveness depends on the size and randomness of the challenge space. Measure it empirically.
+
+**Methodology:**
+1. Run 50 liveness sessions and record every challenge issued
+2. Count unique challenges and compute the repeat rate
+3. For ordered challenges (gesture sequences), count unique sequences
+4. Estimate the total challenge space based on observed variety
+
+| Observed challenge space | Risk | Implication |
+|---|---|---|
+| 1-5 unique challenges | Critical | Attacker pre-records all responses in minutes |
+| 6-20 unique challenges | High | Pre-recording is feasible in a few hours |
+| 21-100 unique challenges | Medium | Pre-recording is expensive but possible |
+| 100+ unique sequences | Low | Pre-recording is impractical; real-time generation required |
+
+If the challenge space is small, report it as a finding regardless of other protections. A small challenge space means the attacker can enumerate every possible challenge and prepare a synthetic response for each.
+
+### Behavioral Consistency Testing
+
+Server-side liveness models analyze frame sequences for naturalness. Test how strict the analysis actually is by submitting frames with controlled anomalies.
+
+**Timing anomalies** — Submit frames with uniform inter-frame intervals (exactly 33ms apart). Real camera capture has jitter (30-40ms). If the server accepts perfectly uniform timing, it is not checking temporal naturalness.
+
+**Motion dynamics** — For a "turn head left" challenge, submit frames where the head position jumps from center to full-left in a single frame (no intermediate positions). Real head rotation produces 5-15 intermediate frames. Acceptance indicates weak motion analysis.
+
+**Sensor correlation** — Submit the frame payload but omit or zero out the accompanying sensor data (accelerometer, gyroscope). If the server does not reject the session, sensor cross-validation is not implemented — the attacker only needs to fake visual data, not motion data.
+
+**Frame entropy** — Submit a sequence where every frame is identical (same image repeated 30 times). If the server accepts this, it is not checking inter-frame variation — a critical gap, since injected static images would pass.
+
+**Resolution/quality mismatch** — Submit frames at a lower resolution or JPEG quality than the camera would natively produce. If accepted, the server is not validating frame metadata against the device's reported camera capabilities.
+
+### Assessment Outcome Matrix
+
+| Finding | Severity | Impact |
+|---|---|---|
+| Nonce reuse (replayed session accepted) | Critical | Full replay attack; pre-recorded sessions work indefinitely |
+| No timeout enforcement | Critical | Attacker has unlimited time to generate synthetic frames |
+| Challenge space < 10 | Critical | All challenges can be pre-recorded |
+| Session reuse after completion | High | Unlimited retry; attacker can brute-force until pass |
+| No certificate pinning on liveness endpoint | High | MITM can read challenges and modify frames |
+| Frames not encrypted within TLS | High | Pinning bypass exposes entire liveness flow |
+| No sensor cross-validation | Medium | Attacker only needs to fake video, not motion |
+| Uniform frame timing accepted | Medium | Injection pipeline detectable by timing, but server ignores it |
+| Challenge space 10-50 | Medium | Pre-recording feasible with moderate effort |
+| Static frames accepted (zero entropy) | High | Simplest possible injection succeeds |
+| Verdict token not session-bound | High | Token from legitimate session reusable for fraud |
+
+**Reporting guidance:** When reporting server-side liveness findings, frame them as protocol implementation gaps rather than algorithm weaknesses. The recommendation is always specific: "invalidate nonces after first use," "enforce the stated timeout server-side," "expand the challenge space to 100+ unique sequences." These are actionable fixes that the development team can implement without replacing their liveness vendor.
+
+---
+
 ## Designing Resilient KYC Flows
 
 The architectural principle is simple: the client is a data collector, not a decision maker. Every verdict, every pass/fail determination, every risk assessment happens on the server. The client captures data, encrypts it, transmits it, and displays the result. That is all it does.
