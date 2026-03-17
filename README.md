@@ -101,7 +101,7 @@ Security professionals conducting **authorized** testing of Android identity ver
 
 If you find this useful, consider buying me a coffee.
 
-<a href="https://www.buymeacoffee.com/iamjosephmj" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height="48"></a>
+<a href="https://buymeacoffee.com/iamjosephmy" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height="48"></a>
 
 ## License
 
