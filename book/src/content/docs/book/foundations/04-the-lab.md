@@ -424,7 +424,7 @@ The skill files live in `skills/`. How you load them depends on your agent:
 | **Aider** | Pass with `--read skills/android-red-team.md` |
 | **Any LLM** | Paste the file contents into the system prompt or context window |
 
-Then ask the agent anything -- "decode this APK and run recon", "write a smali patch to bypass this signature check", "verify my patched build is ready for deployment." The skills give it the domain knowledge to execute like a practitioner, not just suggest.
+Then ask the agent anything -- "decode this APK and run recon", "write a smali patch to assess or neutralize this signature check **in my authorized lab**", "verify my patched build is ready for deployment." The skills give it the domain knowledge to execute like a practitioner, not just suggest.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Full Engagement"
-description: "Running a coordinated multi-step bypass against a complete KYC onboarding flow"
+description: "Running a coordinated multi-step authorized assessment of a complete KYC onboarding flow"
 ---
 
 > **Ethics Note:** This chapter describes a coordinated attack against multi-step identity verification flows. These techniques are powerful -- combined, they can fully bypass real-world onboarding systems. Use them only within the scope of an authorized engagement. Every technique here should be documented, every step evidenced, and every finding reported to the application owner. If you have not read Chapter 2 on rules of engagement, stop and go back now.

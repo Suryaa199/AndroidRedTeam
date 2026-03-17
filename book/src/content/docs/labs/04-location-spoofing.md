@@ -1,6 +1,6 @@
 ---
 title: "Lab 4: Location Spoofing"
-description: "Spoof GPS coordinates to bypass geofencing with mock detection evasion"
+description: "Authorized lab: simulate GPS to assess geofencing and mock-location checks"
 ---
 
 > **Prerequisites:** Lab 2 (First Injection) complete, Chapter 8 (Location Spoofing) read.
@@ -9,9 +9,9 @@ description: "Spoof GPS coordinates to bypass geofencing with mock detection eva
 >
 > **Target:** [`materials/targets/target-kyc-basic.apk`](https://github.com/iamjosephmj/AndroidRedTeam/blob/main/materials/targets/target-kyc-basic.apk) (package `com.poc.biometric`)
 
-The target application has a LocationActivity that performs a geofence check. The device must appear to be near Times Square, New York City (40.7580, -73.9855) for the location verification step to pass. The app also calls `isFromMockProvider()` to detect GPS spoofing tools. You need to bypass both layers: inject the correct coordinates and defeat mock detection.
+The target application has a LocationActivity that performs a geofence check. The device must appear to be near Times Square, New York City (40.7580, -73.9855) for the location verification step to pass. The app also calls `isFromMockProvider()` to detect GPS spoofing tools. You will **assess both layers**: simulate the required coordinates and test mock-detection handling (authorized practice target only).
 
-This lab exercises the LocationInterceptor subsystem. By the end, you will have extracted geofence coordinates from the decoded APK, built a location config, and passed the geofence check with mock detection evasion confirmed in logcat.
+This lab exercises the LocationInterceptor subsystem. By the end, you will have extracted geofence coordinates from the decoded APK, built a location config, and validated geofence behavior with mock-detection handling confirmed in logcat.
 
 ---
 
@@ -205,9 +205,9 @@ cp /tmp/geofence_config.json ./geofence_config.json
 
 ---
 
-## Understanding the Two-Layer Bypass
+## Understanding the two control layers
 
-This lab demonstrates a two-layer bypass that most GPS spoofing tools fail to achieve:
+This lab demonstrates assessment across **two layers** that many naive GPS tools never clear:
 
 **Layer 1: Location Injection.** The LocationInterceptor hooks every path Android uses to deliver GPS data -- `onLocationResult`, `onLocationChanged`, `getLastLocation`, `getCurrentLocation`. When the app asks "where is this phone?", it receives your coordinates. The fake Location object is constructed fresh on every delivery with current timestamps, realistic accuracy jitter, and proper provider metadata. It is indistinguishable from a real GPS fix at the API level.
 

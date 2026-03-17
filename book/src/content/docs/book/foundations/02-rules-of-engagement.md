@@ -3,9 +3,9 @@ title: "Rules of Engagement"
 description: "Legal frameworks, authorization boundaries, and the ethical operator's checklist"
 ---
 
-Everything in this book works. The hooks fire. The frames inject. The GPS coordinates spoof. The sensor readings fabricate. Against a patched target, the techniques described in the following chapters will bypass face detection, defeat liveness checks, fool geofencing, and manipulate motion validation. The tools don't care whether you have permission to use them.
+On **authorized targets** — apps and devices you own or are contracted to test — the techniques in this book let you **simulate attacker capability**: substituted camera feeds, simulated GPS and motion data, and instrumented APK builds. Used correctly, they **validate whether client-side controls hold up** and produce evidence for remediation. The same techniques applied **without authorization** are not security testing; they are unauthorized access. The tooling has no opinion on scope — **you** must.
 
-That distinction — between capability and authorization — is what separates a security professional from an attacker. This chapter exists before any technical content because the rules come first. Not as a formality, not as a disclaimer to protect the authors, but because understanding the legal and ethical boundaries of security testing is a prerequisite for practicing it professionally.
+That distinction — between **authorized assessment** and unauthorized use — is what separates a security professional from an attacker. This chapter comes before the technical content because the rules come first: not as a formality, but because understanding legal and ethical boundaries is a prerequisite for practicing professionally.
 
 If you skip this chapter, you haven't saved time. You've created risk — for yourself, your employer, your client, and the broader security community that depends on maintaining the distinction between authorized testing and unauthorized access.
 
@@ -233,9 +233,9 @@ The safe path is simple: use your own face, use fabricated documents, and delete
 
 Throughout the remaining chapters, you'll encounter callout boxes like this:
 
-> **Ethics Note:** The techniques in this chapter can bypass [specific defense]. Use them only against targets you are authorized to test. Ensure your payloads use synthetic data, not real users' biometric information.
+> **Ethics Note:** The techniques in this chapter can **demonstrate weaknesses in** [specific defense]. Use them only against targets you are authorized to test. Ensure your payloads use synthetic data, not real users' biometric information.
 
-These callouts appear at the start of chapters where the content has direct offensive application. They're not disclaimers — they're operational reminders. When you're deep in the technical details of making a frame injection work, it's easy to lose sight of the broader context. The callouts bring you back to it.
+These callouts appear at the start of chapters where the content has direct security-testing application. They're operational reminders, not a substitute for legal advice. When you're deep in the technical details of making a frame injection work, it's easy to lose sight of the broader context. The callouts bring you back to it.
 
 Consider them part of the methodology. A professional operator thinks about authorization at every step, not just at the beginning of the engagement.
 
@@ -243,4 +243,4 @@ Consider them part of the methodology. A professional operator thinks about auth
 
 ## What Comes Next
 
-With the rules established, Chapter 3 dives into the technology that makes all of this possible. You'll learn how Android delivers camera frames, GPS fixes, and sensor readings to applications — the architecture that creates the attack surfaces you'll spend the rest of this book exploiting. Understanding *why* the hooks work at an architectural level is what separates an operator who can run the tools from one who can adapt when things don't go as expected.
+With the rules established, Chapter 3 dives into the technology that makes all of this possible. You'll learn how Android delivers camera frames, GPS fixes, and sensor readings to applications — the architecture that creates the surfaces you'll spend the rest of this book assessing under authorization. Understanding *why* the hooks work at an architectural level is what separates an operator who can run the tools from one who can adapt when things don't go as expected.

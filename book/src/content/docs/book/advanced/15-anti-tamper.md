@@ -1,6 +1,6 @@
 ---
 title: "Defeating Anti-Tamper Protections"
-description: "Systematic identification and neutralization of integrity checks in hardened APKs"
+description: "Authorized testing: systematic identification and controlled neutralization of integrity checks in hardened APKs"
 ---
 
 Everything you have built so far -- injection hooks, frame replacement, location spoofing, sensor manipulation -- assumes a cooperative target. An APK that does not fight back. You decode it, inject your classes, rebuild, re-sign, sideload, and it runs. No complaints.
@@ -1202,6 +1202,6 @@ Anti-tamper defenses are speed bumps, not walls. They slow you down, they force 
 
 The real question is not whether you can defeat the defenses. It is how quickly you can identify and neutralize all of them without breaking the app. That is a skill you build through practice. The recon patterns in this chapter will find the checks. The decision flowchart will tell you which technique to apply. The worked example shows the full workflow from recon to verified evasion. Do it ten times and it becomes mechanical. Do it fifty times and you will identify defenses from the grep output alone, without even opening the smali file.
 
-**Practice:** Lab 10 (Anti-Tamper Evasion) provides hands-on exercises defeating signature checks, DEX integrity validation, and certificate pinning.
+**Practice:** Lab 10 (Anti-Tamper Evasion) provides hands-on exercises **assessing** signature checks, DEX integrity validation, and certificate pinning on authorized targets.
 
 The next chapter covers automation -- building pipelines that handle the mechanical steps so you can focus on the parts that require judgment.

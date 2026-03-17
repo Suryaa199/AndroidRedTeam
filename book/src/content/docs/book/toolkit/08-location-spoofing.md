@@ -1,9 +1,9 @@
 ---
 title: "Location Spoofing"
-description: "Feeding fake GPS coordinates to bypass geofencing with mock detection evasion"
+description: "Authorized testing: simulated GPS coordinates to assess geofencing and mock-location detection controls"
 ---
 
-> **Ethics Note:** GPS spoofing can bypass location-gated services. Only spoof coordinates against applications you are authorized to test. Use well-known public locations (Times Square, Googleplex) for testing, not coordinates that could be linked to real individuals.
+> **Ethics Note:** GPS simulation can demonstrate gaps in location-gated controls. Only spoof coordinates against applications you are authorized to test. Use well-known public locations (Times Square, Googleplex) for testing, not coordinates that could be linked to real individuals.
 
 Some apps don't just check your face. They check where you are.
 
@@ -62,11 +62,11 @@ The timestamp fields matter more than you'd think. Some apps check whether the l
 
 ---
 
-## The Mock Detection Bypass
+## Mock location detection (assessment)
 
-This is where most amateur GPS spoofing tools fail. Android provides three ways for apps to detect mock locations. All three are neutralized:
+This is where many naive spoofing setups fail. Android provides three ways for apps to detect mock locations. In an **authorized** instrumented build, all three can be neutralized for testing:
 
-| Check | API Level | How It's Bypassed |
+| Check | API Level | Neutralized in test (smali) |
 |-------|-----------|-------------------|
 | `Location.isFromMockProvider()` | API 18-30 | Patched at call site to return `false` |
 | `Location.isMock()` | API 31+ | Patched at call site to return `false` |
@@ -251,9 +251,9 @@ Most apps ignore altitude for geofencing. But some specialized applications (con
 
 ---
 
-## Worked Example: Bypassing a Banking Geofence
+## Worked example: geofence control assessment (authorized practice target)
 
-Let's walk through a complete location spoofing scenario against the practice target.
+Walk through a full location simulation scenario against the **practice target you are authorized to test**.
 
 **Scenario:** The practice app (`com.poc.biometric`) has a LocationActivity that checks if the device is near Times Square, NYC. It uses FusedLocationProviderClient and checks `isFromMockProvider()`.
 
@@ -315,6 +315,6 @@ If the app displays a map or coordinates, you should see your configured locatio
 
 ## What Comes Next
 
-Location spoofing handles the "where" question. But some verification flows also ask "how is the device moving?" — correlating camera data with physical motion from accelerometers and gyroscopes. Chapter 9 covers sensor injection: replacing motion data with physics-consistent synthetic readings that match your camera frames. Together, camera injection, location spoofing, and sensor injection form the complete toolkit for multi-surface verification bypass.
+Location spoofing handles the "where" question. But some verification flows also ask "how is the device moving?" — correlating camera data with physical motion from accelerometers and gyroscopes. Chapter 9 covers sensor injection: replacing motion data with physics-consistent synthetic readings that match your camera frames. Together, camera injection, location simulation, and sensor injection form the methodology for **multi-surface control assessment**.
 
-Complete **Lab 4: Location Spoofing** to practice geofence bypass against the practice target.
+Complete **Lab 4: Location Spoofing** to practice geofence assessment on the practice target.

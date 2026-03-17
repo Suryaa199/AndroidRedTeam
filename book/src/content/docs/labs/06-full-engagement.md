@@ -1,6 +1,6 @@
 ---
 title: "Lab 6: Full Engagement"
-description: "Execute a complete coordinated engagement against a multi-step KYC flow using all injection subsystems"
+description: "Authorized lab: full coordinated assessment of a multi-step KYC flow using all injection subsystems"
 ---
 
 > **Prerequisites:** Labs 0-5 complete, Chapters 10-11 (Full Engagement + Evidence and Reporting) read.

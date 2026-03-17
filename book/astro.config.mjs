@@ -7,11 +7,12 @@ export default defineConfig({
 	base: '/AndroidRedTeam',
 	integrations: [
 		starlight({
-			title: 'Android Biometric Bypass & APK Cloning',
-			description: 'APK tampering, camera injection, GPS spoofing & sensor manipulation against Android identity verification',
+			title: 'Android KYC & Biometric Security Assessment',
+			description:
+				'Authorized methodology: camera, location, sensor simulation, and repackaged APK testing to validate and harden Android identity verification',
 			logo: {
 				src: './src/assets/logo.svg',
-				alt: 'Android Biometric Bypass & APK Cloning',
+				alt: 'Android KYC & Biometric Security Assessment',
 			},
 			favicon: '/favicon.svg',
 			customCss: ['./src/styles/custom.css'],

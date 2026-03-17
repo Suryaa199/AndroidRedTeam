@@ -3,7 +3,7 @@ title: "Sensor Injection"
 description: "Replacing accelerometer, gyroscope, and magnetometer data with physics-consistent synthetic readings"
 ---
 
-> **Ethics Note:** Sensor injection manipulates motion data that liveness checks depend on. Use only against authorized targets. Paired with camera injection, this can bypass sophisticated active liveness systems.
+> **Ethics Note:** Sensor injection manipulates motion data that liveness checks depend on. Use only against authorized targets. Paired with camera injection, it can **demonstrate weaknesses** in active liveness implementations.
 
 You've got camera frames showing a face turning left. You've got GPS coordinates placing the device in Manhattan. But the accelerometer says the phone hasn't moved. The gyroscope confirms: zero rotation. No tilt, no turn, no tremor. The phone is perfectly still on a desk somewhere.
 
@@ -156,7 +156,7 @@ Like location configs, sensor configs hot-reload — push a new file and the val
 
 ## Matching Sensors to Camera Frames
 
-The most critical coordination in any multi-surface bypass is ensuring your sensor data matches your camera data. The rules:
+The most critical coordination in any multi-surface assessment is ensuring your sensor data matches your camera data. The rules:
 
 ### For Passive Liveness (No Active Challenge)
 
@@ -212,6 +212,6 @@ Type 1 is the accelerometer. Type 4 is the gravity sensor. Notice how the gravit
 
 ## What Comes Next
 
-With camera injection (Chapter 7), location spoofing (Chapter 8), and sensor injection (this chapter), you have the complete toolkit for bypassing multi-surface verification systems. Chapter 10 brings them all together in a full engagement — a coordinated operation against a multi-step target that requires all three subsystems working simultaneously.
+With camera injection (Chapter 7), location spoofing (Chapter 8), and sensor injection (this chapter), you have the full methodology for **assessing** multi-surface verification systems. Chapter 10 brings them together in a coordinated authorized engagement against a multi-step practice target that requires all three subsystems working simultaneously.
 
 Complete **Lab 5: Sensor Injection** to practice configuring sensor profiles and matching them to camera frame sequences.

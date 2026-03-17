@@ -1,6 +1,6 @@
 ---
 title: "The Threat Landscape"
-description: "Why biometric verification is an attack surface and how the KYC pipeline works"
+description: "Why identity verification is a security assessment surface and how the KYC pipeline works"
 ---
 
 You open a banking app for the first time. It asks for your name, your date of birth, your address. Then it asks for your face.

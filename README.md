@@ -1,12 +1,14 @@
-# Android Biometric Bypass & APK Cloning
+# Android KYC & Biometric Security Assessment
 
-APK tampering, camera injection, GPS spoofing & sensor manipulation against Android identity verification.
+Authorized red-team methodology to **test and harden** Android identity verification: camera feeds, GPS, sensors, and repackaged (instrumented) APK builds.
 
 **[Read the book →](https://iamjosephmj.github.io/AndroidRedTeam/)**
 
-A practitioner's guide to intercepting and controlling every data source an Android KYC app consumes — camera frames, GPS coordinates, sensor readings, and more. 18 chapters, 14 hands-on labs, and a complete materials kit.
+A practitioner's guide to **assessing** how identity apps consume camera frames, location, motion, and integrity checks — so teams can validate defenses and fix gaps. 18 chapters, 14 hands-on labs, and a materials kit.
 
-> **This material is for authorized security testing only.** Never test applications you do not have explicit permission to assess.
+> **Authorized use only.** For **educational** purposes and **explicitly authorized** security assessments. Never test applications you do not have written permission to assess.
+>
+> **Not legal advice.** The authors provide this material **as-is**, without warranty of any kind. You are solely responsible for complying with laws in your jurisdiction. See the book’s [Rules of Engagement](https://iamjosephmj.github.io/AndroidRedTeam/book/foundations/02-rules-of-engagement/) (Chapter 2).
 
 ---
 
@@ -93,7 +95,7 @@ The site runs at `http://localhost:4321/AndroidRedTeam/`.
 
 ## AI Agent Skills
 
-This repo ships two knowledge files in `skills/` that give any AI coding agent the full red team methodology:
+This repo ships two knowledge files in `skills/` that give any AI coding agent the full **authorized security assessment** methodology:
 
 | Skill | What It Does |
 |-------|-------------|
@@ -104,7 +106,7 @@ Works with **Cursor**, **Windsurf**, **Cline**, **GitHub Copilot**, **Aider**, o
 
 ## Who Is This For
 
-Security professionals conducting **authorized** testing of Android identity verification systems — penetration testers, security engineers, and developers who want to understand biometric bypass so they can defend against it.
+Security professionals conducting **authorized** testing of Android identity verification — penetration testers, security engineers, and developers who need to **validate controls** against camera, location, sensor, and tamper weaknesses.
 
 **No prior reverse engineering experience required.** Part I covers the foundations.
 
@@ -116,4 +118,6 @@ If you find this useful, consider buying me a coffee.
 
 ## License
 
-This material is provided for educational and authorized security testing purposes.
+Code and scripts are released under the **MIT License**. Written content (book, docs) is licensed under **CC BY-NC-SA 4.0**.
+
+All material is provided **"as is"** without warranty, for **educational** and **authorized security testing** purposes only. You are solely responsible for lawful use. See [LICENSE](LICENSE) for full terms.

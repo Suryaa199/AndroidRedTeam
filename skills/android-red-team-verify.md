@@ -1,8 +1,8 @@
-# Android Red Team -- Verification Agent
+# Android Security Assessment — Verification Checklist
 
-Post-patch verification checklist for Android APK red team engagements. Run through this systematically after every patched build before declaring the engagement complete.
+Post-patch verification for **authorized** Android APK assessments. Run through this systematically after every instrumented build before closing an engagement or lab exercise.
 
-This is a **rigid** skill -- follow every phase in order. Do not skip phases. A single unchecked item can mean a silent failure in the field.
+This is a **rigid** skill -- follow every phase in order. Do not skip phases. A single unchecked item can mean a silent failure in the field. **Authorized testing only**; not legal advice.
 
 ---
 

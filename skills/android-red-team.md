@@ -1,6 +1,8 @@
-# Android Red Team & Reverse Engineering Skill
+# Android Security Assessment & Reverse Engineering Skill
 
-General-purpose Android application security testing, APK reverse engineering, smali patching, biometric/authentication bypass, asset manipulation, and anti-tamper evasion. For authorized penetration testing, CTF, and security research only.
+General-purpose **authorized** Android app security testing: reverse engineering, smali patching, assessing biometric and authentication **controls**, instrumented APK builds, asset manipulation, and anti-tamper **testing**. For authorized penetration testing, CTF, and defensive security research only.
+
+**Disclaimer:** Not legal advice. Use only on systems you own or are explicitly authorized to test. Authors disclaim warranty; you are responsible for compliance with applicable law.
 
 ---
 

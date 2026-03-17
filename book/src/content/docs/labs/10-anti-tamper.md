@@ -1,6 +1,6 @@
 ---
 title: "Lab 10: Anti-Tamper Evasion"
-description: "Find and neutralize four layers of defense in a hardened target"
+description: "Authorized lab: identify and safely neutralize defense layers in a hardened target you may test"
 ---
 
 > **Prerequisites:** Labs 7-8 complete, Chapter 15 (Anti-Tamper Evasion) read.

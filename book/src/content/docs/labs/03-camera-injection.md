@@ -1,6 +1,6 @@
 ---
 title: "Lab 3: Camera Injection"
-description: "Replace the live camera feed with pre-recorded frames and pass face detection"
+description: "Authorized lab: substitute the camera feed with prepared frames and assess face detection behavior"
 ---
 
 **Prerequisites:** Lab 2 complete (patched APK deployed, overlay verified). Chapter 7 (Camera Injection) read.

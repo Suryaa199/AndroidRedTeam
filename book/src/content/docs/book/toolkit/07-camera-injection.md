@@ -1,17 +1,17 @@
 ---
 title: "Camera Injection"
-description: "Replacing live camera feeds with pre-recorded frames to bypass face detection and liveness checks"
+description: "Authorized testing: substituting camera feeds with prepared frames to assess face detection and liveness controls"
 ---
 
-This is the core capability. Everything else in the toolkit -- location spoofing, sensor injection -- is supporting fire. Important, sometimes essential for passing multi-factor checks, but ultimately secondary. Camera frame injection is the primary weapon. It is the capability that lets you feed a synthetic face into a liveness check, a fabricated ID document into an OCR scanner, a QR code containing arbitrary data into a barcode reader. You replace what the camera sees with whatever you want, whenever you want.
+This is the core capability. Everything else in the toolkit -- location spoofing, sensor injection -- is supporting fire. Important, sometimes essential for passing multi-factor checks, but ultimately secondary. Camera frame injection is the primary assessment surface. It is the capability that lets you feed a synthetic face into a liveness check **on authorized targets**, a fabricated ID document into an OCR scanner, a QR code containing arbitrary data into a barcode reader. You replace what the camera sees with whatever you want, whenever you want.
 
 What makes this fundamentally different from screen overlays, virtual cameras, or video loopback tools: the hooks do not modify the camera hardware. They do not interfere with Android's camera stack. They do not create a virtual camera device. They sit between the camera and the app's code -- at the API boundary, in the method calls the app already makes -- and swap the data in transit. The app calls `analyze()` and it gets a `FakeImageProxy`. It calls `toBitmap()` and it gets your frame. It calls `getPlanes()` and it gets your frame converted to YUV. It calls `getImage()` and it gets a `FakeImage` with your plane data. Every access path returns your data.
 
 The app does not know. The SDK does not know. Google ML Kit and other commercial liveness SDKs -- they all process what they receive through standard Android camera APIs. And what they receive is what you chose to give them. As far as any code in the process is concerned, a real person is holding a real phone and a real camera is looking at a real face.
 
-This chapter teaches you how the injection works at a technical level, how to prepare frames that pass detection, and how to operate the injection against live targets. By the end, you will have the skills to bypass any camera-based verification that processes frames through the standard Android camera APIs.
+This chapter teaches you how the injection works at a technical level, how to prepare frames that pass detection, and how to operate the injection against live targets. By the end, you will know how to **assess** camera-based verification that processes frames through the standard Android camera APIs.
 
-> **Ethics Note:** Camera injection can bypass biometric verification. Use only synthetic face data (your own or AI-generated) and only against authorized targets. Never use photographs of real people without consent. The techniques described in this chapter are powerful and can cause real harm if misused. Authorization and scope must be established before any engagement. If you skipped Chapter 2, go back and read it now.
+> **Ethics Note:** Camera injection can demonstrate weaknesses in biometric verification. Use only synthetic face data (your own or AI-generated) and only against authorized targets. Never use photographs of real people without consent. The techniques described in this chapter are powerful and can cause real harm if misused. Authorization and scope must be established before any engagement. If you skipped Chapter 2, go back and read it now.
 
 ---
 
@@ -184,7 +184,7 @@ In practice, most modern targets use CameraX. When you see `[+] Patched analyze(
 
 ## Preparing Your Frames
 
-The frames you inject determine whether the bypass succeeds or fails. A perfect injection pipeline delivering bad frames still fails the verification. Frame preparation is an operational skill, not just a technical step.
+The frames you inject determine whether the assessment goal is met under test. A perfect injection pipeline delivering bad frames still fails the verification. Frame preparation is an operational skill, not just a technical step.
 
 ### From video -- for liveness checks
 
@@ -361,7 +361,7 @@ The rules:
 
 ---
 
-## Worked Example: Bypassing ML Kit Face Detection
+## Worked example: assessing ML Kit face detection (authorized lab)
 
 This is the most common scenario you will encounter. The target app uses Google ML Kit for face detection as the first gate in a KYC onboarding flow. ML Kit opens the front camera, runs face detection on every analysis frame, and draws a bounding box when it finds a face. Until a face is detected, the user cannot proceed.
 
@@ -464,7 +464,7 @@ adb exec-out screencap -p > face_injection_evidence.png
 adb logcat -d -s FrameInterceptor > frame_delivery.log
 ```
 
-The screenshot shows ML Kit's bounding box on your injected face. The log file shows every DELIVERED and CONSUMED event. Together, these constitute your evidence that the face detection gate was bypassed through frame injection.
+The screenshot shows ML Kit's bounding box on your injected face. The log file shows every DELIVERED and CONSUMED event. Together, these constitute your evidence that the face detection control did not hold against injected frames under test.
 
 ### Why this works against ML Kit
 

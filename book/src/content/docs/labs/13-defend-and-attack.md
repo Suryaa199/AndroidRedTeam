@@ -1,19 +1,19 @@
 ---
 title: "Lab 13: Defend and Attack"
-description: "Add defenses to your target app, then bypass them -- understanding both sides"
+description: "Add defenses to your own target app, then assess whether they hold under instrumentation"
 ---
 
 > **Prerequisites:** Lab 12 complete (you have a working target app), Chapters 15, 17, and 18 read.
 >
 > **Estimated time:** 90-120 minutes.
 >
-> **Chapter reference:** Chapters 15 (Defeating Anti-Tamper Protections), 17 (Blue Team Detection Guide), 18 (Defense-in-Depth Architecture).
+> **Chapter reference:** Chapters 15 (Anti-Tamper Evasion), 17 (Blue Team Detection Guide), 18 (Defense-in-Depth Architecture).
 >
 > **Target:** The app you built in Lab 12 (`com.redteam.target`).
 
-In Lab 12, you built a target app and attacked it. The attack succeeded trivially because the app had no defenses. Now you add three defense layers to your app, observe the patch-tool fail against them, and then systematically bypass each one using the techniques from Lab 10 and Chapter 15.
+In Lab 12, you built a practice target app and assessed it without defenses. The controls failed trivially because nothing was hardened. Now you add three defense layers to **your** app, observe the patch-tool fail against them, then **systematically test whether each control holds** using the techniques from Lab 10 and Chapter 15.
 
-This is the full red-team/blue-team cycle in a single lab. You build the defense, you break the defense, and you write an assessment of what worked and what did not.
+This is the full assess-and-harden cycle in a single lab: you implement defenses, stress them under authorized instrumentation, and document what held and what did not.
 
 ---
 

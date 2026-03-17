@@ -278,7 +278,7 @@ Every section serves one of these questions. There is no filler. If a section do
 ### Report Template
 
 ```markdown
-# Engagement Report: Biometric Verification Bypass Assessment
+# Engagement Report: Identity verification control assessment
 
 ## Target Identification
 - **Application:** [App name as it appears on device]

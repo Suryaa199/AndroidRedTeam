@@ -1,6 +1,6 @@
 ---
 title: "Lab 5: Sensor Injection"
-description: "Defeat motion-correlated liveness by injecting physics-consistent sensor data matched to camera frames"
+description: "Authorized lab: assess motion-correlated liveness using physics-consistent simulated sensor data matched to camera frames"
 ---
 
 > **Prerequisites:** Labs 2-3 (First Injection + Camera Injection) complete, Chapter 9 (Sensor Injection) read.
@@ -444,7 +444,7 @@ This lab requires two subsystems to tell the same story at the same time. The ph
 
 In a real engagement, the timing adds another layer of difficulty. Active liveness challenges are time-bounded -- you have a few seconds to complete the requested action. Your frames must show the motion, your sensors must confirm it, and both must be active before the timeout expires. The hot-reload capability of the config files helps, but the coordination still requires planning.
 
-This is also why sensor injection is the technique that most attackers skip. Camera injection alone passes many targets. Adding location spoofing extends coverage to geofenced flows. But defeating motion-correlated liveness requires understanding the physics, building matched payload pairs, and validating the math before deployment. The payoff is access to the most hardened verification flows -- the ones that explicitly defend against camera-only attacks.
+This is also why sensor injection is the technique that most attackers skip. Camera injection alone passes many targets. Adding location spoofing extends coverage to geofenced flows. But assessing motion-correlated liveness requires understanding the physics, building matched payload pairs, and validating the math before deployment. The payoff is access to the most hardened verification flows -- the ones that explicitly defend against camera-only attacks.
 
 ---
 

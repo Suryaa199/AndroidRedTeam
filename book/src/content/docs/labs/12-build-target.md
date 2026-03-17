@@ -1,6 +1,6 @@
 ---
 title: "Lab 12: Build Your Own Target"
-description: "Create a vulnerable KYC app and then attack it with the toolkit"
+description: "Build a practice KYC app, then assess it with the toolkit in your own lab"
 ---
 
 > **Prerequisites:** Labs 0-6 complete, Android Studio installed (or command-line Gradle with Android SDK), Chapters 3, 7, and 8 read.
