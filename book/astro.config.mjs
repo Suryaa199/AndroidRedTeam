@@ -7,11 +7,11 @@ export default defineConfig({
 	base: '/AndroidRedTeam',
 	integrations: [
 		starlight({
-			title: 'Android Red Team',
-			description: 'Bytecode-level biometric bypass for Android KYC and liveness verification',
+			title: 'Injecting Android',
+			description: 'Camera injection, GPS spoofing, and sensor manipulation against Android identity verification',
 			logo: {
 				src: './src/assets/logo.svg',
-				alt: 'Android Red Team',
+				alt: 'Injecting Android',
 			},
 			favicon: '/favicon.svg',
 			customCss: ['./src/styles/custom.css'],

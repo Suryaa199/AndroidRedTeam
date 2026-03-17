@@ -1,10 +1,10 @@
-# Android Red Team
+# Injecting Android
 
-Bytecode-level biometric bypass for Android KYC and liveness verification.
+Camera injection, GPS spoofing, and sensor manipulation against Android identity verification.
 
 **[Read the book →](https://iamjosephmj.github.io/AndroidRedTeam/)**
 
-A practitioner's guide to camera injection, GPS spoofing, and sensor manipulation against Android identity verification systems. 18 chapters, 14 hands-on labs, and a complete materials kit.
+A practitioner's guide to intercepting and controlling every data source an Android KYC app consumes — camera frames, GPS coordinates, sensor readings, and more. 18 chapters, 14 hands-on labs, and a complete materials kit.
 
 > **This material is for authorized security testing only.** Never test applications you do not have explicit permission to assess.
 
